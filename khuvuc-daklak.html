@@ -1,0 +1,3793 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tìm kiếm khu vực Đắk Lắk</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .search-box {
+            display: flex;
+            margin-bottom: 20px;
+            gap: 10px;
+        }
+        input, select {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            flex-grow: 1;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .results {
+            margin-top: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+            position: sticky;
+            top: 0;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+        .no-results {
+            text-align: center;
+            padding: 20px;
+            color: #7f8c8d;
+        }
+        .filter-section {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .filter-item {
+            flex: 1;
+            min-width: 200px;
+        }
+        .khuvuc-I {
+            background-color: #e6f7ff;
+        }
+        .khuvuc-II {
+            background-color: #fff7e6;
+        }
+        .khuvuc-III {
+            background-color: #f9e6ff;
+        }
+        .export-btn {
+            background-color: #27ae60;
+            margin-left: 10px;
+        }
+        .export-btn:hover {
+            background-color: #219653;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Tìm kiếm khu vực Đắk Lắk</h1>
+        
+        <div class="filter-section">
+            <div class="filter-item">
+                <label for="huyen">Huyện/Thị xã:</label>
+                <select id="huyen">
+                    <option value="">Tất cả</option>
+                </select>
+            </div>
+            
+            <div class="filter-item">
+                <label for="xa">Xã/Phường:</label>
+                <select id="xa">
+                    <option value="">Tất cả</option>
+                </select>
+            </div>
+            
+            <div class="filter-item">
+                <label for="khuvuc">Khu vực:</label>
+                <select id="khuvuc">
+                    <option value="">Tất cả</option>
+                    <option value="I">Khu vực I</option>
+                    <option value="II">Khu vực II</option>
+                    <option value="III">Khu vực III</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="Nhập từ khóa tìm kiếm (thôn, buôn, địa chỉ...)">
+            <button onclick="searchData()">Tìm kiếm</button>
+            <button class="export-btn" onclick="exportToExcel()">Xuất Excel</button>
+        </div>
+        
+        <div class="results">
+            <div id="resultCount"></div>
+            <div id="resultsTable"></div>
+        </div>
+    </div>
+
+    <script>
+        // Dữ liệu từ JSON
+        const data = [
+            // Dữ liệu JSON của bạn ở đây
+            // Đã được rút gọn để tiết kiệm không gian
+            // Toàn bộ dữ liệu từ file json của bạn nên được đặt ở đây
+            {
+    "huyen": "Huyện Buôn Đôn",
+    "xa": "Xã Krông Na",
+    "thon": "Buôn Đrang Phốk",
+    "khuvuc": "III",
+    "diachi": "Buôn Đrang Phốk, Xã Krông Na, Huyện Buôn Đôn"
+  },
+  {
+    "huyen": "Huyện Buôn Đôn",
+    "xa": "Xã Krông Na",
+    "thon": "Buôn Ea Mar",
+    "khuvuc": "III",
+    "diachi": "Buôn Ea Mar, Xã Krông Na, Huyện Buôn Đôn"
+  },
+  {
+    "huyen": "Huyện Buôn Đôn",
+    "xa": "Xã Krông Na",
+    "thon": "Buôn Đôn",
+    "khuvuc": "III",
+    "diachi": "Buôn Đôn, Xã Krông Na, Huyện Buôn Đôn"
+  },
+  {
+    "huyen": "Huyện Buôn Đôn",
+    "xa": "Xã Krông Na",
+    "thon": "Buôn Ea Rông",
+    "khuvuc": "III",
+    "diachi": "Buôn Ea Rông, Xã Krông Na, Huyện Buôn Đôn"
+  },
+  {
+    "huyen": "Huyện Buôn Đôn",
+    "xa": "Xã Krông Na",
+    "thon": "Buôn Ea Rông B",
+    "khuvuc": "III",
+    "diachi": "Buôn Ea Rông B, Xã Krông Na, Huyện Buôn Đôn"
+  },
+  {
+    "huyen": "Huyện Buôn Đôn",
+    "xa": "Xã Krông Na",
+    "thon": "Buôn Jang Lành",
+    "khuvuc": "III",
+    "diachi": "Buôn Jang Lành, Xã Krông Na, Huyện Buôn Đôn"
+  },
+  {
+    "huyen": "Huyện Buôn Đôn",
+    "xa": "Xã Krông Na",
+    "thon": "Thôn Thống Nhất",
+    "khuvuc": "III",
+    "diachi": "Thôn Thống Nhất, Xã Krông Na, Huyện Buôn Đôn"
+  },
+  {
+    "huyen": "Huyện Buôn Đôn",
+    "xa": "Xã Tân Hòa",
+    "thon": "Thôn 1",
+    "khuvuc": "III",
+    "diachi": "Thôn 1, Xã Tân Hòa, Huyện Buôn Đôn"
+  },
+  {
+    "huyen": "Huyện Buôn Đôn",
+    "xa": "Xã Tân Hòa",
+    "thon": "Thôn 2",
+    "khuvuc": "III",
+    "diachi": "Thôn 2, Xã Tân Hòa, Huyện Buôn Đôn"
+  },
+  {
+    "huyen": "Huyện Buôn Đôn",
+    "xa": "Xã Tân Hòa",
+    "thon": "Thôn 3",
+    "khuvuc": "III",
+    "diachi": "Thôn 3, Xã Tân Hòa, Huyện Buôn Đôn"
+  },
+  {
+    "huyen": "Huyện Buôn Đôn",
+    "xa": "Xã Tân Hòa",
+    "thon": "Thôn 4",
+    "khuvuc": "III",
+    "diachi": "Thôn 4, Xã Tân Hòa, Huyện Buôn Đôn"
+  },
+  {
+    "huyen": "Huyện Buôn Đôn",
+    "xa": "Xã Tân Hòa",
+    "thon": "Thôn 5",
+    "khuvuc": "III",
+    "diachi": "Thôn 5, Xã Tân Hòa, Huyện Buôn Đôn"
+  },
+  {
+    "huyen": "Huyện Buôn Đôn",
+    "xa": "Xã Tân Hòa",
+    "thon": "Thôn 7",
+    "khuvuc": "III",
+    "diachi": "Thôn 7, Xã Tân Hòa, Huyện Buôn Đôn"
+  },
+  {
+    "huyen": "Huyện Buôn Đôn",
+    "xa": "Xã Tân Hòa",
+    "thon": "Thôn 8",
+    "khuvuc": "III",
+    "diachi": "Thôn 8, Xã Tân Hòa, Huyện Buôn Đôn"
+  },
+  {
+    "huyen": "Huyện Buôn Đôn",
+    "xa": "Xã Tân Hòa",
+    "thon": "Thôn 9",
+    "khuvuc": "III",
+    "diachi": "Thôn 9, Xã Tân Hòa, Huyện Buôn Đôn"
+  },
+  {
+    "huyen": "Huyện Buôn Đôn",
+    "xa": "Xã Tân Hòa",
+    "thon": "Thôn 10",
+    "khuvuc": "III",
+    "diachi": "Thôn 10, Xã Tân Hòa, Huyện Buôn Đôn"
+  },
+  {
+    "huyen": "Huyện Buôn Đôn",
+    "xa": "Xã Tân Hòa",
+    "thon": "Thôn 11",
+    "khuvuc": "III",
+    "diachi": "Thôn 11, Xã Tân Hòa, Huyện Buôn Đôn"
+  },
+  {
+    "huyen": "Huyện Buôn Đôn",
+    "xa": "Xã Tân Hòa",
+    "thon": "Thôn 12",
+    "khuvuc": "III",
+    "diachi": "Thôn 12, Xã Tân Hòa, Huyện Buôn Đôn"
+  },
+  {
+    "huyen": "Huyện Buôn Đôn",
+    "xa": "Xã Tân Hòa",
+    "thon": "Thôn 16",
+    "khuvuc": "III",
+    "diachi": "Thôn 16, Xã Tân Hòa, Huyện Buôn Đôn"
+  },
+  {
+    "huyen": "Huyện Buôn Đôn",
+    "xa": "Xã Ea Wer",
+    "thon": "Buôn Tul A",
+    "khuvuc": "III",
+    "diachi": "Buôn Tul A, Xã Ea Wer, Huyện Buôn Đôn"
+  },
+  {
+    "huyen": "Huyện Buôn Đôn",
+    "xa": "Xã Ea Wer",
+    "thon": "Buôn Tul B",
+    "khuvuc": "III",
+    "diachi": "Buôn Tul B, Xã Ea Wer, Huyện Buôn Đôn"
+  },
+  {
+    "huyen": "Huyện Buôn Đôn",
+    "xa": "Xã Ea Wer",
+    "thon": "Thôn 9",
+    "khuvuc": "III",
+    "diachi": "Thôn 9, Xã Ea Wer, Huyện Buôn Đôn"
+  },
+  {
+    "huyen": "Huyện Buôn Đôn",
+    "xa": "Xã Ea Wer",
+    "thon": "Thôn Ea Duất",
+    "khuvuc": "III",
+    "diachi": "Thôn Ea Duất, Xã Ea Wer, Huyện Buôn Đôn"
+  },
+  {
+    "huyen": "Huyện Buôn Đôn",
+    "xa": "Xã Ea Wer",
+    "thon": "Thôn Ea Ly",
+    "khuvuc": "III",
+    "diachi": "Thôn Ea Ly, Xã Ea Wer, Huyện Buôn Đôn"
+  },
+  {
+    "huyen": "Huyện Buôn Đôn",
+    "xa": "Xã Ea Wer",
+    "thon": "Buôn Ea Prĩ",
+    "khuvuc": "III",
+    "diachi": "Buôn Ea Prĩ, Xã Ea Wer, Huyện Buôn Đôn"
+  },
+  {
+    "huyen": "Huyện Buôn Đôn",
+    "xa": "Xã Ea Wer",
+    "thon": "Xã Ea Huar",
+    "khuvuc": "III",
+    "diachi": "Xã Ea Huar, Xã Ea Wer, Huyện Buôn Đôn"
+  },
+  {
+    "huyen": "Huyện Buôn Đôn",
+    "xa": "Xã Ea Wer",
+    "thon": "Buôn Jang Pông",
+    "khuvuc": "III",
+    "diachi": "Buôn Jang Pông, Xã Ea Wer, Huyện Buôn Đôn"
+  },
+  {
+    "huyen": "Huyện Buôn Đôn",
+    "xa": "Xã Ea Wer",
+    "thon": "Buôn Nà Xược",
+    "khuvuc": "III",
+    "diachi": "Buôn Nà Xược, Xã Ea Wer, Huyện Buôn Đôn"
+  },
+  {
+    "huyen": "Huyện Buôn Đôn",
+    "xa": "Xã Ea Wer",
+    "thon": "Buôn N'drếch A",
+    "khuvuc": "III",
+    "diachi": "Buôn N'drếch A, Xã Ea Wer, Huyện Buôn Đôn"
+  },
+  {
+    "huyen": "Huyện Buôn Đôn",
+    "xa": "Xã Ea Wer",
+    "thon": "Buôn N'drếch B",
+    "khuvuc": "III",
+    "diachi": "Buôn N'drếch B, Xã Ea Wer, Huyện Buôn Đôn"
+  },
+  {
+    "huyen": "Huyện Buôn Đôn",
+    "xa": "Xã Cuôr Knia",
+    "thon": "Thôn 1",
+    "khuvuc": "III",
+    "diachi": "Thôn 1, Xã Cuôr Knia, Huyện Buôn Đôn"
+  },
+  {
+    "huyen": "Huyện Buôn Đôn",
+    "xa": "Xã Cuôr Knia",
+    "thon": "Thôn 7",
+    "khuvuc": "III",
+    "diachi": "Thôn 7, Xã Cuôr Knia, Huyện Buôn Đôn"
+  },
+  {
+    "huyen": "Huyện Buôn Đôn",
+    "xa": "Xã Cuôr Knia",
+    "thon": "Thôn 8",
+    "khuvuc": "III",
+    "diachi": "Thôn 8, Xã Cuôr Knia, Huyện Buôn Đôn"
+  },
+  {
+    "huyen": "Huyện Buôn Đôn",
+    "xa": "Xã Cuôr Knia",
+    "thon": "Thôn Ea Kning",
+    "khuvuc": "III",
+    "diachi": "Thôn Ea Kning, Xã Cuôr Knia, Huyện Buôn Đôn"
+  },
+  {
+    "huyen": "Huyện Buôn Đôn",
+    "xa": "Xã Cuôr Knia",
+    "thon": "Thôn Sình Mây",
+    "khuvuc": "III",
+    "diachi": "Thôn Sình Mây, Xã Cuôr Knia, Huyện Buôn Đôn"
+  },
+  {
+    "huyen": "Huyện Buôn Đôn",
+    "xa": "Xã Cuôr Knia",
+    "thon": "Thôn 11",
+    "khuvuc": "III",
+    "diachi": "Thôn 11, Xã Cuôr Knia, Huyện Buôn Đôn"
+  },
+  {
+    "huyen": "Huyện Buôn Đôn",
+    "xa": "Xã Cuôr Knia",
+    "thon": "Thôn 12",
+    "khuvuc": "III",
+    "diachi": "Thôn 12, Xã Cuôr Knia, Huyện Buôn Đôn"
+  },
+  {
+    "huyen": "Huyện Buôn Đôn",
+    "xa": "Xã Cuôr Knia",
+    "thon": "Thôn 13",
+    "khuvuc": "III",
+    "diachi": "Thôn 13, Xã Cuôr Knia, Huyện Buôn Đôn"
+  },
+  {
+    "huyen": "Huyện Buôn Đôn",
+    "xa": "Xã Ea Nuôl",
+    "thon": "Thôn Hòa Nam 2",
+    "khuvuc": "III",
+    "diachi": "Thôn Hòa Nam 2, Xã Ea Nuôl, Huyện Buôn Đôn"
+  },
+  {
+    "huyen": "Huyện Buôn Đôn",
+    "xa": "Xã Ea Nuôl",
+    "thon": "Buôn Niêng 1",
+    "khuvuc": "III",
+    "diachi": "Buôn Niêng 1, Xã Ea Nuôl, Huyện Buôn Đôn"
+  },
+  {
+    "huyen": "Huyện Buôn Đôn",
+    "xa": "Xã Ea Nuôl",
+    "thon": "Buôn Niêng 2",
+    "khuvuc": "III",
+    "diachi": "Buôn Niêng 2, Xã Ea Nuôl, Huyện Buôn Đôn"
+  },
+  {
+    "huyen": "Huyện Buôn Đôn",
+    "xa": "Xã Ea Nuôl",
+    "thon": "Buôn Niêng 3",
+    "khuvuc": "III",
+    "diachi": "Buôn Niêng 3, Xã Ea Nuôl, Huyện Buôn Đôn"
+  },
+  {
+    "huyen": "Huyện Buôn Đôn",
+    "xa": "Xã Ea Nuôl",
+    "thon": "Buôn Ko Đung A",
+    "khuvuc": "III",
+    "diachi": "Buôn Ko Đung A, Xã Ea Nuôl, Huyện Buôn Đôn"
+  },
+  {
+    "huyen": "Huyện Buôn Đôn",
+    "xa": "Xã Ea Nuôl",
+    "thon": "Buôn Ko Đung B",
+    "khuvuc": "III",
+    "diachi": "Buôn Ko Đung B, Xã Ea Nuôl, Huyện Buôn Đôn"
+  },
+  {
+    "huyen": "Huyện Buôn Đôn",
+    "xa": "Xã Ea Nuôl",
+    "thon": "Buôn Ea Mdhar 1A",
+    "khuvuc": "III",
+    "diachi": "Buôn Ea Mdhar 1A, Xã Ea Nuôl, Huyện Buôn Đôn"
+  },
+  {
+    "huyen": "Huyện Buôn Đôn",
+    "xa": "Xã Ea Nuôl",
+    "thon": "Buôn Ea Mdhar 1B",
+    "khuvuc": "III",
+    "diachi": "Buôn Ea Mdhar 1B, Xã Ea Nuôl, Huyện Buôn Đôn"
+  },
+  {
+    "huyen": "Huyện Buôn Đôn",
+    "xa": "Xã Ea Nuôl",
+    "thon": "Thôn Tân Phú",
+    "khuvuc": "III",
+    "diachi": "Thôn Tân Phú, Xã Ea Nuôl, Huyện Buôn Đôn"
+  },
+  {
+    "huyen": "Huyện Buôn Đôn",
+    "xa": "Xã Ea Nuôl",
+    "thon": "Thôn Hòa Thanh",
+    "khuvuc": "III",
+    "diachi": "Thôn Hòa Thanh, Xã Ea Nuôl, Huyện Buôn Đôn"
+  },
+  {
+    "huyen": "Huyện Cư Mgar",
+    "xa": "Xã Ea Kuêh",
+    "thon": "Buôn Hlúk",
+    "khuvuc": "III",
+    "diachi": "Buôn Hlúk, Xã Ea Kuêh, Huyện Cư Mgar"
+  },
+  {
+    "huyen": "Huyện Cư Mgar",
+    "xa": "Xã Ea Kuêh",
+    "thon": "Buôn Xê Đăng",
+    "khuvuc": "III",
+    "diachi": "Buôn Xê Đăng, Xã Ea Kuêh, Huyện Cư Mgar"
+  },
+  {
+    "huyen": "Huyện Cư Mgar",
+    "xa": "Xã Ea M'droh",
+    "thon": "Thôn Đồng Giao",
+    "khuvuc": "III",
+    "diachi": "Thôn Đồng Giao, Xã Ea M'droh, Huyện Cư Mgar"
+  },
+  {
+    "huyen": "Huyện Cư Mgar",
+    "xa": "Xã Ea Kiết",
+    "thon": "Buôn Hmông",
+    "khuvuc": "III",
+    "diachi": "Buôn Hmông, Xã Ea Kiết, Huyện Cư Mgar"
+  },
+  {
+    "huyen": "Huyện Ea H'leo",
+    "xa": "Xã Ea Sol",
+    "thon": "Buôn Kry",
+    "khuvuc": "I",
+    "diachi": "Buôn Kry, Xã Ea Sol, Huyện Ea H'leo"
+  },
+  {
+    "huyen": "Huyện Ea H'leo",
+    "xa": "Xã Ea Sol",
+    "thon": "Buôn Chăm",
+    "khuvuc": "I",
+    "diachi": "Buôn Chăm, Xã Ea Sol, Huyện Ea H'leo"
+  },
+  {
+    "huyen": "Huyện Ea H'leo",
+    "xa": "Xã Ea Tir",
+    "thon": "Thôn 1",
+    "khuvuc": "I",
+    "diachi": "Thôn 1, Xã Ea Tir, Huyện Ea H'leo"
+  },
+  {
+    "huyen": "Huyện Ea H'leo",
+    "xa": "Xã Ea Tir",
+    "thon": "Thôn 2",
+    "khuvuc": "I",
+    "diachi": "Thôn 2, Xã Ea Tir, Huyện Ea H'leo"
+  },
+  {
+    "huyen": "Huyện Ea H'leo",
+    "xa": "Xã Ea Tir",
+    "thon": "Thôn 3",
+    "khuvuc": "I",
+    "diachi": "Thôn 3, Xã Ea Tir, Huyện Ea H'leo"
+  },
+  {
+    "huyen": "Huyện Ea H'leo",
+    "xa": "Xã Ea Tir",
+    "thon": "Thôn 4",
+    "khuvuc": "I",
+    "diachi": "Thôn 4, Xã Ea Tir, Huyện Ea H'leo"
+  },
+  {
+    "huyen": "Huyện Ea H'leo",
+    "xa": "Xã Ea Tir",
+    "thon": "Thôn Bình Minh",
+    "khuvuc": "I",
+    "diachi": "Thôn Bình Minh, Xã Ea Tir, Huyện Ea H'leo"
+  },
+  {
+    "huyen": "Huyện Ea H'leo",
+    "xa": "Xã Ea Tir",
+    "thon": "Thôn Bình Sơn",
+    "khuvuc": "I",
+    "diachi": "Thôn Bình Sơn, Xã Ea Tir, Huyện Ea H'leo"
+  },
+  {
+    "huyen": "Huyện Ea H'leo",
+    "xa": "Xã Ea Tir",
+    "thon": "Buôn Drăn",
+    "khuvuc": "III",
+    "diachi": "Buôn Drăn, Xã Ea Tir, Huyện Ea H'leo"
+  },
+  {
+    "huyen": "Huyện Ea H'leo",
+    "xa": "Xã Cư Amung",
+    "thon": "Thôn 3",
+    "khuvuc": "III",
+    "diachi": "Thôn 3, Xã Cư Amung, Huyện Ea H'leo"
+  },
+  {
+    "huyen": "Huyện Ea H'leo",
+    "xa": "Xã Cư Amung",
+    "thon": "Thôn 4",
+    "khuvuc": "III",
+    "diachi": "Thôn 4, Xã Cư Amung, Huyện Ea H'leo"
+  },
+  {
+    "huyen": "Huyện Ea H'leo",
+    "xa": "Xã Cư Amung",
+    "thon": "Thôn 9",
+    "khuvuc": "III",
+    "diachi": "Thôn 9, Xã Cư Amung, Huyện Ea H'leo"
+  },
+  {
+    "huyen": "Huyện Ea H'leo",
+    "xa": "Xã Cư Amung",
+    "thon": "Buôn Tơyoa",
+    "khuvuc": "III",
+    "diachi": "Buôn Tơyoa, Xã Cư Amung, Huyện Ea H'leo"
+  },
+  {
+    "huyen": "Huyện Ea H'leo",
+    "xa": "Xã Ea Hiao",
+    "thon": "Thôn 7C",
+    "khuvuc": "III",
+    "diachi": "Thôn 7C, Xã Ea Hiao, Huyện Ea H'leo"
+  },
+  {
+    "huyen": "Huyện Ea H'leo",
+    "xa": "Xã Ea Hiao",
+    "thon": "Buôn Krái",
+    "khuvuc": "III",
+    "diachi": "Buôn Krái, Xã Ea Hiao, Huyện Ea H'leo"
+  },
+  {
+    "huyen": "Huyện Ea H'leo",
+    "xa": "Xã Ea Răl",
+    "thon": "Buôn Tung Xê",
+    "khuvuc": "III",
+    "diachi": "Buôn Tung Xê, Xã Ea Răl, Huyện Ea H'leo"
+  },
+  {
+    "huyen": "Huyện Ea H'leo",
+    "xa": "Xã Ea Răl",
+    "thon": "Buôn Tung Tăh",
+    "khuvuc": "III",
+    "diachi": "Buôn Tung Tăh, Xã Ea Răl, Huyện Ea H'leo"
+  },
+  {
+    "huyen": "Huyện Ea H'leo",
+    "xa": "Xã Ea Wy",
+    "thon": "Thôn 1c",
+    "khuvuc": "I",
+    "diachi": "Thôn 1c, Xã Ea Wy, Huyện Ea H'leo"
+  },
+  {
+    "huyen": "Huyện Ea Kar",
+    "xa": "Xã Cư Elang",
+    "thon": "Thôn 1",
+    "khuvuc": "I",
+    "diachi": "Thôn 1, Xã Cư Elang, Huyện Ea Kar"
+  },
+  {
+    "huyen": "Huyện Ea Kar",
+    "xa": "Xã Cư Elang",
+    "thon": "Thôn 2",
+    "khuvuc": "I",
+    "diachi": "Thôn 2, Xã Cư Elang, Huyện Ea Kar"
+  },
+  {
+    "huyen": "Huyện Ea Kar",
+    "xa": "Xã Cư Elang",
+    "thon": "Thôn 3",
+    "khuvuc": "I",
+    "diachi": "Thôn 3, Xã Cư Elang, Huyện Ea Kar"
+  },
+  {
+    "huyen": "Huyện Ea Kar",
+    "xa": "Xã Cư Elang",
+    "thon": "Thôn 4",
+    "khuvuc": "I",
+    "diachi": "Thôn 4, Xã Cư Elang, Huyện Ea Kar"
+  },
+  {
+    "huyen": "Huyện Ea Kar",
+    "xa": "Xã Cư Elang",
+    "thon": "Thôn 6B",
+    "khuvuc": "I",
+    "diachi": "Thôn 6B, Xã Cư Elang, Huyện Ea Kar"
+  },
+  {
+    "huyen": "Huyện Ea Kar",
+    "xa": "Xã Cư Elang",
+    "thon": "Thôn 6C",
+    "khuvuc": "I",
+    "diachi": "Thôn 6C, Xã Cư Elang, Huyện Ea Kar"
+  },
+  {
+    "huyen": "Huyện Ea Kar",
+    "xa": "Xã Cư Elang",
+    "thon": "Thôn 6D",
+    "khuvuc": "III",
+    "diachi": "Thôn 6D, Xã Cư Elang, Huyện Ea Kar"
+  },
+  {
+    "huyen": "Huyện Ea Kar",
+    "xa": "Xã Cư Elang",
+    "thon": "Thôn 6E",
+    "khuvuc": "III",
+    "diachi": "Thôn 6E, Xã Cư Elang, Huyện Ea Kar"
+  },
+  {
+    "huyen": "Huyện Ea Kar",
+    "xa": "Xã Cư Elang",
+    "thon": "Buôn Vân Kiều",
+    "khuvuc": "III",
+    "diachi": "Buôn Vân Kiều, Xã Cư Elang, Huyện Ea Kar"
+  },
+  {
+    "huyen": "Huyện Ea Kar",
+    "xa": "Xã Cư Elang",
+    "thon": "Buôn Ea Rớk",
+    "khuvuc": "III",
+    "diachi": "Buôn Ea Rớk, Xã Cư Elang, Huyện Ea Kar"
+  },
+  {
+    "huyen": "Huyện Ea Kar",
+    "xa": "Xã Ea Sô",
+    "thon": "Thôn 4",
+    "khuvuc": "III",
+    "diachi": "Thôn 4, Xã Ea Sô, Huyện Ea Kar"
+  },
+  {
+    "huyen": "Huyện Ea Kar",
+    "xa": "Xã Ea Sô",
+    "thon": "Buôn Ea Brah",
+    "khuvuc": "III",
+    "diachi": "Buôn Ea Brah, Xã Ea Sô, Huyện Ea Kar"
+  },
+  {
+    "huyen": "Huyện Ea Kar",
+    "xa": "Xã Ea Sô",
+    "thon": "Buôn Cư Ana Săn",
+    "khuvuc": "III",
+    "diachi": "Buôn Cư Ana Săn, Xã Ea Sô, Huyện Ea Kar"
+  },
+  {
+    "huyen": "Huyện Ea Kar",
+    "xa": "Xã Ea Sô",
+    "thon": "Buôn Ea Púk",
+    "khuvuc": "III",
+    "diachi": "Buôn Ea Púk, Xã Ea Sô, Huyện Ea Kar"
+  },
+  {
+    "huyen": "Huyện Ea Kar",
+    "xa": "Xã Cư Bông",
+    "thon": "Thôn 16",
+    "khuvuc": "III",
+    "diachi": "Thôn 16, Xã Cư Bông, Huyện Ea Kar"
+  },
+  {
+    "huyen": "Huyện Ea Kar",
+    "xa": "Xã Cư Bông",
+    "thon": "Thôn 17",
+    "khuvuc": "III",
+    "diachi": "Thôn 17, Xã Cư Bông, Huyện Ea Kar"
+  },
+  {
+    "huyen": "Huyện Ea Kar",
+    "xa": "Xã Cư Bông",
+    "thon": "Thôn 21",
+    "khuvuc": "III",
+    "diachi": "Thôn 21, Xã Cư Bông, Huyện Ea Kar"
+  },
+  {
+    "huyen": "Huyện Ea Kar",
+    "xa": "Xã Cư Bông",
+    "thon": "Thôn 22",
+    "khuvuc": "III",
+    "diachi": "Thôn 22, Xã Cư Bông, Huyện Ea Kar"
+  },
+  {
+    "huyen": "Huyện Ea Kar",
+    "xa": "Xã Cư Bông",
+    "thon": "Thôn 23",
+    "khuvuc": "III",
+    "diachi": "Thôn 23, Xã Cư Bông, Huyện Ea Kar"
+  },
+  {
+    "huyen": "Huyện Ea Kar",
+    "xa": "Xã Cư Bông",
+    "thon": "Buôn Trưng",
+    "khuvuc": "III",
+    "diachi": "Buôn Trưng, Xã Cư Bông, Huyện Ea Kar"
+  },
+  {
+    "huyen": "Huyện Ea Kar",
+    "xa": "Xã Cư Bông",
+    "thon": "Thôn Ea Bớt",
+    "khuvuc": "III",
+    "diachi": "Thôn Ea Bớt, Xã Cư Bông, Huyện Ea Kar"
+  },
+  {
+    "huyen": "Huyện Ea Kar",
+    "xa": "Xã Cư Bông",
+    "thon": "Buôn Ea Bô",
+    "khuvuc": "III",
+    "diachi": "Buôn Ea Bô, Xã Cư Bông, Huyện Ea Kar"
+  },
+  {
+    "huyen": "Huyện Ea Kar",
+    "xa": "Xã Cư Bông",
+    "thon": "Buôn Ea Gal",
+    "khuvuc": "III",
+    "diachi": "Buôn Ea Gal, Xã Cư Bông, Huyện Ea Kar"
+  },
+  {
+    "huyen": "Huyện Ea Kar",
+    "xa": "Xã Cư Prông",
+    "thon": "Buôn M'Um",
+    "khuvuc": "III",
+    "diachi": "Buôn M'Um, Xã Cư Prông, Huyện Ea Kar"
+  },
+  {
+    "huyen": "Huyện Ea Kar",
+    "xa": "Xã Cư Prông",
+    "thon": "Thôn 10",
+    "khuvuc": "III",
+    "diachi": "Thôn 10, Xã Cư Prông, Huyện Ea Kar"
+  },
+  {
+    "huyen": "Huyện Ea Kar",
+    "xa": "Xã Cư Prông",
+    "thon": "Thôn 15",
+    "khuvuc": "III",
+    "diachi": "Thôn 15, Xã Cư Prông, Huyện Ea Kar"
+  },
+  {
+    "huyen": "Huyện Ea Kar",
+    "xa": "Xã Cư Prông",
+    "thon": "Thôn 16",
+    "khuvuc": "III",
+    "diachi": "Thôn 16, Xã Cư Prông, Huyện Ea Kar"
+  },
+  {
+    "huyen": "Huyện Ea Kar",
+    "xa": "Xã Cư Prông",
+    "thon": "Thôn 3",
+    "khuvuc": "III",
+    "diachi": "Thôn 3, Xã Cư Prông, Huyện Ea Kar"
+  },
+  {
+    "huyen": "Huyện Ea Kar",
+    "xa": "Xã Cư Prông",
+    "thon": "Thôn 6A",
+    "khuvuc": "III",
+    "diachi": "Thôn 6A, Xã Cư Prông, Huyện Ea Kar"
+  },
+  {
+    "huyen": "Huyện Ea Kar",
+    "xa": "Xã Cư Prông",
+    "thon": "Thôn Hạ Long",
+    "khuvuc": "III",
+    "diachi": "Thôn Hạ Long, Xã Cư Prông, Huyện Ea Kar"
+  },
+  {
+    "huyen": "Huyện Ea Kar",
+    "xa": "Xã Ea Sar",
+    "thon": "Thôn 3",
+    "khuvuc": "III",
+    "diachi": "Thôn 3, Xã Ea Sar, Huyện Ea Kar"
+  },
+  {
+    "huyen": "Huyện Ea Kar",
+    "xa": "Xã Ea Sar",
+    "thon": "Thôn 4",
+    "khuvuc": "III",
+    "diachi": "Thôn 4, Xã Ea Sar, Huyện Ea Kar"
+  },
+  {
+    "huyen": "Huyện Ea Kar",
+    "xa": "Xã Ea Sar",
+    "thon": "Thôn 6",
+    "khuvuc": "III",
+    "diachi": "Thôn 6, Xã Ea Sar, Huyện Ea Kar"
+  },
+  {
+    "huyen": "Huyện Ea Kar",
+    "xa": "Xã Ea Sar",
+    "thon": "Thôn Thanh Sơn",
+    "khuvuc": "III",
+    "diachi": "Thôn Thanh Sơn, Xã Ea Sar, Huyện Ea Kar"
+  },
+  {
+    "huyen": "Huyện Ea Kar",
+    "xa": "Xã Ea Sar",
+    "thon": "Buôn Ea Sar",
+    "khuvuc": "III",
+    "diachi": "Buôn Ea Sar, Xã Ea Sar, Huyện Ea Kar"
+  },
+  {
+    "huyen": "Huyện Ea Kar",
+    "xa": "Xã Ea Sar",
+    "thon": "Buôn Xê Đăng",
+    "khuvuc": "III",
+    "diachi": "Buôn Xê Đăng, Xã Ea Sar, Huyện Ea Kar"
+  },
+  {
+    "huyen": "Huyện Ea Kar",
+    "xa": "Xã Cư Yang",
+    "thon": "Thôn 3",
+    "khuvuc": "III",
+    "diachi": "Thôn 3, Xã Cư Yang, Huyện Ea Kar"
+  },
+  {
+    "huyen": "Huyện Ea Kar",
+    "xa": "Xã Cư Yang",
+    "thon": "Thôn 8",
+    "khuvuc": "III",
+    "diachi": "Thôn 8, Xã Cư Yang, Huyện Ea Kar"
+  },
+  {
+    "huyen": "Huyện Ea Kar",
+    "xa": "Xã Cư Yang",
+    "thon": "Thôn 10",
+    "khuvuc": "III",
+    "diachi": "Thôn 10, Xã Cư Yang, Huyện Ea Kar"
+  },
+  {
+    "huyen": "Huyện Ea Kar",
+    "xa": "Xã Cư Yang",
+    "thon": "Thôn 11",
+    "khuvuc": "III",
+    "diachi": "Thôn 11, Xã Cư Yang, Huyện Ea Kar"
+  },
+  {
+    "huyen": "Huyện Ea Kar",
+    "xa": "Xã Cư Yang",
+    "thon": "Thôn 12",
+    "khuvuc": "III",
+    "diachi": "Thôn 12, Xã Cư Yang, Huyện Ea Kar"
+  },
+  {
+    "huyen": "Huyện Ea Kar",
+    "xa": "Xã Cư Yang",
+    "thon": "Thôn 13",
+    "khuvuc": "III",
+    "diachi": "Thôn 13, Xã Cư Yang, Huyện Ea Kar"
+  },
+  {
+    "huyen": "Huyện Ea Kar",
+    "xa": "Xã Ea Ô",
+    "thon": "Thôn 2C",
+    "khuvuc": "III",
+    "diachi": "Thôn 2C, Xã Ea Ô, Huyện Ea Kar"
+  },
+  {
+    "huyen": "Huyện Ea Kar",
+    "xa": "Xã Cư Ni",
+    "thon": "Buôn Ea Ga",
+    "khuvuc": "III",
+    "diachi": "Buôn Ea Ga, Xã Cư Ni, Huyện Ea Kar"
+  },
+  {
+    "huyen": "Huyện Ea Kar",
+    "xa": "Xã Cư Ni",
+    "thon": "Buôn Ea Knuốp",
+    "khuvuc": "III",
+    "diachi": "Buôn Ea Knuốp, Xã Cư Ni, Huyện Ea Kar"
+  },
+  {
+    "huyen": "Huyện Ea Kar",
+    "xa": "Xã Cư Huê",
+    "thon": "Buôn M'Hăng",
+    "khuvuc": "III",
+    "diachi": "Buôn M'Hăng, Xã Cư Huê, Huyện Ea Kar"
+  },
+  {
+    "huyen": "Huyện Ea Kar",
+    "xa": "Xã Cư Huê",
+    "thon": "Buôn M'ar",
+    "khuvuc": "I",
+    "diachi": "Buôn M'ar, Xã Cư Huê, Huyện Ea Kar"
+  },
+  {
+    "huyen": "Huyện Ea Kar",
+    "xa": "Xã Ea Păl",
+    "thon": "Thôn 6B",
+    "khuvuc": "I",
+    "diachi": "Thôn 6B, Xã Ea Păl, Huyện Ea Kar"
+  },
+  {
+    "huyen": "Huyện Krông Ana",
+    "xa": "Thị trấn Buôn Trấp",
+    "thon": "Buôn Trấp",
+    "khuvuc": "I",
+    "diachi": "Buôn Trấp, Thị trấn Buôn Trấp, Huyện Krông Ana"
+  },
+  {
+    "huyen": "Huyện Krông Ana",
+    "xa": "Thị trấn Buôn Trấp",
+    "thon": "Buôn Rung",
+    "khuvuc": "I",
+    "diachi": "Buôn Rung, Thị trấn Buôn Trấp, Huyện Krông Ana"
+  },
+  {
+    "huyen": "Huyện Krông Ana",
+    "xa": "Thị trấn Buôn Trấp",
+    "thon": "Buôn Êcăm",
+    "khuvuc": "I",
+    "diachi": "Buôn Êcăm, Thị trấn Buôn Trấp, Huyện Krông Ana"
+  },
+  {
+    "huyen": "Huyện Krông Ana",
+    "xa": "Xã Ea Bông",
+    "thon": "Buôn Năc",
+    "khuvuc": "I",
+    "diachi": "Buôn Năc, Xã Ea Bông, Huyện Krông Ana"
+  },
+  {
+    "huyen": "Huyện Krông Ana",
+    "xa": "Xã Ea Bông",
+    "thon": "Buôn Dham",
+    "khuvuc": "I",
+    "diachi": "Buôn Dham, Xã Ea Bông, Huyện Krông Ana"
+  },
+  {
+    "huyen": "Huyện Krông Ana",
+    "xa": "Xã Ea Bông",
+    "thon": "Buôn Hma",
+    "khuvuc": "II",
+    "diachi": "Buôn Hma, Xã Ea Bông, Huyện Krông Ana"
+  },
+  {
+    "huyen": "Huyện Krông Ana",
+    "xa": "Xã Ea Bông",
+    "thon": "Buôn Riăng",
+    "khuvuc": "II",
+    "diachi": "Buôn Riăng, Xã Ea Bông, Huyện Krông Ana"
+  },
+  {
+    "huyen": "Huyện Krông Ana",
+    "xa": "Xã Ea Bông",
+    "thon": "Buôn Knul",
+    "khuvuc": "II",
+    "diachi": "Buôn Knul, Xã Ea Bông, Huyện Krông Ana"
+  },
+  {
+    "huyen": "Huyện Krông Ana",
+    "xa": "Xã Dur Kmăl",
+    "thon": "Buôn Dur1",
+    "khuvuc": "II",
+    "diachi": "Buôn Dur1, Xã Dur Kmăl, Huyện Krông Ana"
+  },
+  {
+    "huyen": "Huyện Krông Ana",
+    "xa": "Xã Ea Na",
+    "thon": "Buôn Tơ Lơ",
+    "khuvuc": "II",
+    "diachi": "Buôn Tơ Lơ, Xã Ea Na, Huyện Krông Ana"
+  },
+  {
+    "huyen": "Huyện Krông Ana",
+    "xa": "Xã Ea Na",
+    "thon": "Buôn Cuăh",
+    "khuvuc": "II",
+    "diachi": "Buôn Cuăh, Xã Ea Na, Huyện Krông Ana"
+  },
+  {
+    "huyen": "Huyện Krông Bông",
+    "xa": "Xã Yang Reh",
+    "thon": "Buôn Trôk Ăt",
+    "khuvuc": "I",
+    "diachi": "Buôn Trôk Ăt, Xã Yang Reh, Huyện Krông Bông"
+  },
+  {
+    "huyen": "Huyện Krông Bông",
+    "xa": "Xã Yang Reh",
+    "thon": "Buôn Yang Reh",
+    "khuvuc": "I",
+    "diachi": "Buôn Yang Reh, Xã Yang Reh, Huyện Krông Bông"
+  },
+  {
+    "huyen": "Huyện Krông Bông",
+    "xa": "Xã Ea Trul",
+    "thon": "Buôn Krông",
+    "khuvuc": "I",
+    "diachi": "Buôn Krông, Xã Ea Trul, Huyện Krông Bông"
+  },
+  {
+    "huyen": "Huyện Krông Bông",
+    "xa": "Xã Ea Trul",
+    "thon": "Buôn Plum",
+    "khuvuc": "III",
+    "diachi": "Buôn Plum, Xã Ea Trul, Huyện Krông Bông"
+  },
+  {
+    "huyen": "Huyện Krông Bông",
+    "xa": "Xã Ea Trul",
+    "thon": "Buôn Ja",
+    "khuvuc": "III",
+    "diachi": "Buôn Ja, Xã Ea Trul, Huyện Krông Bông"
+  },
+  {
+    "huyen": "Huyện Krông Bông",
+    "xa": "Xã Ea Trul",
+    "thon": "Buôn Cư Mil",
+    "khuvuc": "III",
+    "diachi": "Buôn Cư Mil, Xã Ea Trul, Huyện Krông Bông"
+  },
+  {
+    "huyen": "Huyện Krông Bông",
+    "xa": "Xã Ea Trul",
+    "thon": "Buôn Ktluốt",
+    "khuvuc": "III",
+    "diachi": "Buôn Ktluốt, Xã Ea Trul, Huyện Krông Bông"
+  },
+  {
+    "huyen": "Huyện Krông Bông",
+    "xa": "Xã Ea Trul",
+    "thon": "Buôn Băng Kung",
+    "khuvuc": "III",
+    "diachi": "Buôn Băng Kung, Xã Ea Trul, Huyện Krông Bông"
+  },
+  {
+    "huyen": "Huyện Krông Bông",
+    "xa": "Xã Hòa Sơn",
+    "thon": "Buôn Ja",
+    "khuvuc": "III",
+    "diachi": "Buôn Ja, Xã Hòa Sơn, Huyện Krông Bông"
+  },
+  {
+    "huyen": "Huyện Krông Bông",
+    "xa": "Xã Dang Kang",
+    "thon": "Buôn Dang Kang",
+    "khuvuc": "III",
+    "diachi": "Buôn Dang Kang, Xã Dang Kang, Huyện Krông Bông"
+  },
+  {
+    "huyen": "Huyện Krông Bông",
+    "xa": "Xã Dang Kang",
+    "thon": "Buôn Cư Păm",
+    "khuvuc": "III",
+    "diachi": "Buôn Cư Păm, Xã Dang Kang, Huyện Krông Bông"
+  },
+  {
+    "huyen": "Huyện Krông Bông",
+    "xa": "Xã Dang Kang",
+    "thon": "Buôn Cưênun B",
+    "khuvuc": "III",
+    "diachi": "Buôn Cưênun B, Xã Dang Kang, Huyện Krông Bông"
+  },
+  {
+    "huyen": "Huyện Krông Bông",
+    "xa": "Xã Dang Kang",
+    "thon": "Buôn Cưênun A",
+    "khuvuc": "III",
+    "diachi": "Buôn Cưênun A, Xã Dang Kang, Huyện Krông Bông"
+  },
+  {
+    "huyen": "Huyện Krông Bông",
+    "xa": "Xã Dang Kang",
+    "thon": "Buôn Cư Kõêmông",
+    "khuvuc": "III",
+    "diachi": "Buôn Cư Kõêmông, Xã Dang Kang, Huyện Krông Bông"
+  },
+  {
+    "huyen": "Huyện Krông Bông",
+    "xa": "Xã Hòa Phong",
+    "thon": "Thôn Noh Prông",
+    "khuvuc": "III",
+    "diachi": "Thôn Noh Prông, Xã Hòa Phong, Huyện Krông Bông"
+  },
+  {
+    "huyen": "Huyện Krông Bông",
+    "xa": "Xã Hòa Phong",
+    "thon": "Buôn Tliêr",
+    "khuvuc": "III",
+    "diachi": "Buôn Tliêr, Xã Hòa Phong, Huyện Krông Bông"
+  },
+  {
+    "huyen": "Huyện Krông Bông",
+    "xa": "Xã Hòa Phong",
+    "thon": "Buôn Cư Phiang",
+    "khuvuc": "III",
+    "diachi": "Buôn Cư Phiang, Xã Hòa Phong, Huyện Krông Bông"
+  },
+  {
+    "huyen": "Huyện Krông Bông",
+    "xa": "Xã Hòa Phong",
+    "thon": "Buôn Ngô A",
+    "khuvuc": "III",
+    "diachi": "Buôn Ngô A, Xã Hòa Phong, Huyện Krông Bông"
+  },
+  {
+    "huyen": "Huyện Krông Bông",
+    "xa": "Xã Hòa Phong",
+    "thon": "Buôn Ngô B",
+    "khuvuc": "III",
+    "diachi": "Buôn Ngô B, Xã Hòa Phong, Huyện Krông Bông"
+  },
+  {
+    "huyen": "Huyện Krông Bông",
+    "xa": "Xã Hòa Phong",
+    "thon": "Thôn Ea Khiêm",
+    "khuvuc": "III",
+    "diachi": "Thôn Ea Khiêm, Xã Hòa Phong, Huyện Krông Bông"
+  },
+  {
+    "huyen": "Huyện Krông Bông",
+    "xa": "Xã Cư Pui",
+    "thon": "Thôn Dhung Knung",
+    "khuvuc": "III",
+    "diachi": "Thôn Dhung Knung, Xã Cư Pui, Huyện Krông Bông"
+  },
+  {
+    "huyen": "Huyện Krông Bông",
+    "xa": "Xã Cư Pui",
+    "thon": "Buôn Phung",
+    "khuvuc": "III",
+    "diachi": "Buôn Phung, Xã Cư Pui, Huyện Krông Bông"
+  },
+  {
+    "huyen": "Huyện Krông Bông",
+    "xa": "Xã Cư Pui",
+    "thon": "Buôn Blăk",
+    "khuvuc": "III",
+    "diachi": "Buôn Blăk, Xã Cư Pui, Huyện Krông Bông"
+  },
+  {
+    "huyen": "Huyện Krông Bông",
+    "xa": "Xã Cư Pui",
+    "thon": "Buôn Đăk Tuôr",
+    "khuvuc": "III",
+    "diachi": "Buôn Đăk Tuôr, Xã Cư Pui, Huyện Krông Bông"
+  },
+  {
+    "huyen": "Huyện Krông Bông",
+    "xa": "Xã Cư Pui",
+    "thon": "Buôn Khanh",
+    "khuvuc": "III",
+    "diachi": "Buôn Khanh, Xã Cư Pui, Huyện Krông Bông"
+  },
+  {
+    "huyen": "Huyện Krông Bông",
+    "xa": "Xã Cư Pui",
+    "thon": "Buôn Khóa",
+    "khuvuc": "III",
+    "diachi": "Buôn Khóa, Xã Cư Pui, Huyện Krông Bông"
+  },
+  {
+    "huyen": "Huyện Krông Bông",
+    "xa": "Xã Cư Pui",
+    "thon": "Thôn Ea Uôl",
+    "khuvuc": "III",
+    "diachi": "Thôn Ea Uôl, Xã Cư Pui, Huyện Krông Bông"
+  },
+  {
+    "huyen": "Huyện Krông Bông",
+    "xa": "Xã Cư Pui",
+    "thon": "Thôn Ea Lang",
+    "khuvuc": "III",
+    "diachi": "Thôn Ea Lang, Xã Cư Pui, Huyện Krông Bông"
+  },
+  {
+    "huyen": "Huyện Krông Bông",
+    "xa": "Xã Cư Pui",
+    "thon": "Thôn Cư Rang",
+    "khuvuc": "III",
+    "diachi": "Thôn Cư Rang, Xã Cư Pui, Huyện Krông Bông"
+  },
+  {
+    "huyen": "Huyện Krông Bông",
+    "xa": "Xã Cư Pui",
+    "thon": "Thôn Cư Tê",
+    "khuvuc": "III",
+    "diachi": "Thôn Cư Tê, Xã Cư Pui, Huyện Krông Bông"
+  },
+  {
+    "huyen": "Huyện Krông Bông",
+    "xa": "Xã Cư Pui",
+    "thon": "Thôn Ea Bar",
+    "khuvuc": "III",
+    "diachi": "Thôn Ea Bar, Xã Cư Pui, Huyện Krông Bông"
+  },
+  {
+    "huyen": "Huyện Krông Bông",
+    "xa": "Xã Cư Pui",
+    "thon": "Thôn Ea Rớt",
+    "khuvuc": "III",
+    "diachi": "Thôn Ea Rớt, Xã Cư Pui, Huyện Krông Bông"
+  },
+  {
+    "huyen": "Huyện Krông Bông",
+    "xa": "Xã Cư Drăm",
+    "thon": "Buôn Cư Đrăm",
+    "khuvuc": "III",
+    "diachi": "Buôn Cư Đrăm, Xã Cư Drăm, Huyện Krông Bông"
+  },
+  {
+    "huyen": "Huyện Krông Bông",
+    "xa": "Xã Cư Drăm",
+    "thon": "Buôn Chàm A",
+    "khuvuc": "III",
+    "diachi": "Buôn Chàm A, Xã Cư Drăm, Huyện Krông Bông"
+  },
+  {
+    "huyen": "Huyện Krông Bông",
+    "xa": "Xã Cư Drăm",
+    "thon": "Buôn Chàm B",
+    "khuvuc": "III",
+    "diachi": "Buôn Chàm B, Xã Cư Drăm, Huyện Krông Bông"
+  },
+  {
+    "huyen": "Huyện Krông Bông",
+    "xa": "Xã Cư Drăm",
+    "thon": "Buôn Tơng Rang A",
+    "khuvuc": "III",
+    "diachi": "Buôn Tơng Rang A, Xã Cư Drăm, Huyện Krông Bông"
+  },
+  {
+    "huyen": "Huyện Krông Bông",
+    "xa": "Xã Cư Drăm",
+    "thon": "Buôn Tơng Rang B",
+    "khuvuc": "III",
+    "diachi": "Buôn Tơng Rang B, Xã Cư Drăm, Huyện Krông Bông"
+  },
+  {
+    "huyen": "Huyện Krông Bông",
+    "xa": "Xã Cư Drăm",
+    "thon": "Thôn Yang Hăn",
+    "khuvuc": "III",
+    "diachi": "Thôn Yang Hăn, Xã Cư Drăm, Huyện Krông Bông"
+  },
+  {
+    "huyen": "Huyện Krông Bông",
+    "xa": "Xã Cư Drăm",
+    "thon": "Thôn Ea Hăn",
+    "khuvuc": "III",
+    "diachi": "Thôn Ea Hăn, Xã Cư Drăm, Huyện Krông Bông"
+  },
+  {
+    "huyen": "Huyện Krông Bông",
+    "xa": "Xã Cư Drăm",
+    "thon": "Thôn Ea Luêh",
+    "khuvuc": "III",
+    "diachi": "Thôn Ea Luêh, Xã Cư Drăm, Huyện Krông Bông"
+  },
+  {
+    "huyen": "Huyện Krông Bông",
+    "xa": "Xã Cư Drăm",
+    "thon": "Thôn Nao Huh",
+    "khuvuc": "III",
+    "diachi": "Thôn Nao Huh, Xã Cư Drăm, Huyện Krông Bông"
+  },
+  {
+    "huyen": "Huyện Krông Bông",
+    "xa": "Xã Cư Drăm",
+    "thon": "Thôn Cư Dhắt",
+    "khuvuc": "III",
+    "diachi": "Thôn Cư Dhắt, Xã Cư Drăm, Huyện Krông Bông"
+  },
+  {
+    "huyen": "Huyện Krông Bông",
+    "xa": "Xã Yang Mao",
+    "thon": "Buôn Tul",
+    "khuvuc": "III",
+    "diachi": "Buôn Tul, Xã Yang Mao, Huyện Krông Bông"
+  },
+  {
+    "huyen": "Huyện Krông Bông",
+    "xa": "Xã Yang Mao",
+    "thon": "Buôn Mnang Dơng",
+    "khuvuc": "III",
+    "diachi": "Buôn Mnang Dơng, Xã Yang Mao, Huyện Krông Bông"
+  },
+  {
+    "huyen": "Huyện Krông Bông",
+    "xa": "Xã Yang Mao",
+    "thon": "Buôn Kiều",
+    "khuvuc": "III",
+    "diachi": "Buôn Kiều, Xã Yang Mao, Huyện Krông Bông"
+  },
+  {
+    "huyen": "Huyện Krông Bông",
+    "xa": "Xã Yang Mao",
+    "thon": "Buôn Hằng Năm",
+    "khuvuc": "III",
+    "diachi": "Buôn Hằng Năm, Xã Yang Mao, Huyện Krông Bông"
+  },
+  {
+    "huyen": "Huyện Krông Bông",
+    "xa": "Xã Yang Mao",
+    "thon": "Buôn M'ghi",
+    "khuvuc": "III",
+    "diachi": "Buôn M'ghi, Xã Yang Mao, Huyện Krông Bông"
+  },
+  {
+    "huyen": "Huyện Krông Búk",
+    "xa": "Xã Pơng Drang",
+    "thon": "Buôn Tâng Mai",
+    "khuvuc": "III",
+    "diachi": "Buôn Tâng Mai, Xã Pơng Drang, Huyện Krông Búk"
+  },
+  {
+    "huyen": "Huyện Krông Búk",
+    "xa": "Xã Cư Pơng",
+    "thon": "Buôn Khal",
+    "khuvuc": "III",
+    "diachi": "Buôn Khal, Xã Cư Pơng, Huyện Krông Búk"
+  },
+  {
+    "huyen": "Huyện Krông Búk",
+    "xa": "Xã Cư Pơng",
+    "thon": "Buôn Kđoh",
+    "khuvuc": "III",
+    "diachi": "Buôn Kđoh, Xã Cư Pơng, Huyện Krông Búk"
+  },
+  {
+    "huyen": "Huyện Krông Búk",
+    "xa": "Xã Cư Pơng",
+    "thon": "Buôn Ea Túk",
+    "khuvuc": "III",
+    "diachi": "Buôn Ea Túk, Xã Cư Pơng, Huyện Krông Búk"
+  },
+  {
+    "huyen": "Huyện Krông Búk",
+    "xa": "Xã Ea Sin",
+    "thon": "Buôn Ea Sin",
+    "khuvuc": "I",
+    "diachi": "Buôn Ea Sin, Xã Ea Sin, Huyện Krông Búk"
+  },
+  {
+    "huyen": "Huyện Krông Búk",
+    "xa": "Xã Ea Sin",
+    "thon": "Buôn Ea Pông",
+    "khuvuc": "II",
+    "diachi": "Buôn Ea Pông, Xã Ea Sin, Huyện Krông Búk"
+  },
+  {
+    "huyen": "Huyện Krông Búk",
+    "xa": "Xã Ea Sin",
+    "thon": "Buôn Cư Kanh",
+    "khuvuc": "II",
+    "diachi": "Buôn Cư Kanh, Xã Ea Sin, Huyện Krông Búk"
+  },
+  {
+    "huyen": "Huyện Krông Búk",
+    "xa": "Xã Ea Sin",
+    "thon": "Buôn Cư Mtao",
+    "khuvuc": "II",
+    "diachi": "Buôn Cư Mtao, Xã Ea Sin, Huyện Krông Búk"
+  },
+  {
+    "huyen": "Huyện Krông Búk",
+    "xa": "Xã Ea Sin",
+    "thon": "Buôn Ea Kring",
+    "khuvuc": "II",
+    "diachi": "Buôn Ea Kring, Xã Ea Sin, Huyện Krông Búk"
+  },
+  {
+    "huyen": "Huyện Krông Búk",
+    "xa": "Xã Ea Sin",
+    "thon": "Buôn Ea Kap",
+    "khuvuc": "II",
+    "diachi": "Buôn Ea Kap, Xã Ea Sin, Huyện Krông Búk"
+  },
+  {
+    "huyen": "Huyện Krông Búk",
+    "xa": "Xã Cư Né",
+    "thon": "Buôn Ea Zin",
+    "khuvuc": "III",
+    "diachi": "Buôn Ea Zin, Xã Cư Né, Huyện Krông Búk"
+  },
+  {
+    "huyen": "Huyện Krông Búk",
+    "xa": "Xã Cư Né",
+    "thon": "Buôn Mùi 1",
+    "khuvuc": "III",
+    "diachi": "Buôn Mùi 1, Xã Cư Né, Huyện Krông Búk"
+  },
+  {
+    "huyen": "Huyện Krông Búk",
+    "xa": "Xã Cư Né",
+    "thon": "Buôn Mùi 2",
+    "khuvuc": "III",
+    "diachi": "Buôn Mùi 2, Xã Cư Né, Huyện Krông Búk"
+  },
+  {
+    "huyen": "Huyện Krông Búk",
+    "xa": "Xã Cư Né",
+    "thon": "Buôn Kô",
+    "khuvuc": "III",
+    "diachi": "Buôn Kô, Xã Cư Né, Huyện Krông Búk"
+  },
+  {
+    "huyen": "Huyện Krông Búk",
+    "xa": "Xã Cư Né",
+    "thon": "Buôn Kdrô 1",
+    "khuvuc": "III",
+    "diachi": "Buôn Kdrô 1, Xã Cư Né, Huyện Krông Búk"
+  },
+  {
+    "huyen": "Huyện Krông Búk",
+    "xa": "Xã Cư Né",
+    "thon": "Buôn Kdrô 2",
+    "khuvuc": "III",
+    "diachi": "Buôn Kdrô 2, Xã Cư Né, Huyện Krông Búk"
+  },
+  {
+    "huyen": "Huyện Krông Búk",
+    "xa": "Xã Cư Né",
+    "thon": "Buôn Kmu",
+    "khuvuc": "I",
+    "diachi": "Buôn Kmu, Xã Cư Né, Huyện Krông Búk"
+  },
+  {
+    "huyen": "Huyện Krông Búk",
+    "xa": "Xã Chứ Kbô",
+    "thon": "Buôn Ea Nho",
+    "khuvuc": "I",
+    "diachi": "Buôn Ea Nho, Xã Chứ Kbô, Huyện Krông Búk"
+  },
+  {
+    "huyen": "Huyện Cư Kuin",
+    "xa": "Xã Ea Ning",
+    "thon": "Buôn Pưk Prong",
+    "khuvuc": "I",
+    "diachi": "Buôn Pưk Prong, Xã Ea Ning, Huyện Cư Kuin"
+  },
+  {
+    "huyen": "Huyện Cư Kuin",
+    "xa": "Xã Cư Êwi",
+    "thon": "Buôn Tăc M'nga",
+    "khuvuc": "I",
+    "diachi": "Buôn Tăc M'nga, Xã Cư Êwi, Huyện Cư Kuin"
+  },
+  {
+    "huyen": "Huyện Cư Kuin",
+    "xa": "Xã Hòa Hiệp",
+    "thon": "Buôn Cư Knao",
+    "khuvuc": "I",
+    "diachi": "Buôn Cư Knao, Xã Hòa Hiệp, Huyện Cư Kuin"
+  },
+  {
+    "huyen": "Huyện Cư Kuin",
+    "xa": "Xã Ea Tiêu",
+    "thon": "Buôn Knir",
+    "khuvuc": "II",
+    "diachi": "Buôn Knir, Xã Ea Tiêu, Huyện Cư Kuin"
+  },
+  {
+    "huyen": "Huyện Ea Súp",
+    "xa": "Xã Cư Mlan",
+    "thon": "Thôn 7",
+    "khuvuc": "II",
+    "diachi": "Thôn 7, Xã Cư Mlan, Huyện Ea Súp"
+  },
+  {
+    "huyen": "Huyện Ea Súp",
+    "xa": "Xã Cư Mlan",
+    "thon": "Thôn Bình Lợi",
+    "khuvuc": "I",
+    "diachi": "Thôn Bình Lợi, Xã Cư Mlan, Huyện Ea Súp"
+  },
+  {
+    "huyen": "Huyện Ea Súp",
+    "xa": "Xã Cư Kbang",
+    "thon": "Thôn 1",
+    "khuvuc": "I",
+    "diachi": "Thôn 1, Xã Cư Kbang, Huyện Ea Súp"
+  },
+  {
+    "huyen": "Huyện Ea Súp",
+    "xa": "Xã Cư Kbang",
+    "thon": "Thôn 3",
+    "khuvuc": "I",
+    "diachi": "Thôn 3, Xã Cư Kbang, Huyện Ea Súp"
+  },
+  {
+    "huyen": "Huyện Ea Súp",
+    "xa": "Xã Cư Kbang",
+    "thon": "Thôn 4a",
+    "khuvuc": "III",
+    "diachi": "Thôn 4a, Xã Cư Kbang, Huyện Ea Súp"
+  },
+  {
+    "huyen": "Huyện Ea Súp",
+    "xa": "Xã Cư Kbang",
+    "thon": "Thôn 4b",
+    "khuvuc": "III",
+    "diachi": "Thôn 4b, Xã Cư Kbang, Huyện Ea Súp"
+  },
+  {
+    "huyen": "Huyện Ea Súp",
+    "xa": "Xã Cư Kbang",
+    "thon": "Thôn 6",
+    "khuvuc": "III",
+    "diachi": "Thôn 6, Xã Cư Kbang, Huyện Ea Súp"
+  },
+  {
+    "huyen": "Huyện Ea Súp",
+    "xa": "Xã Cư Kbang",
+    "thon": "Cụm 8",
+    "khuvuc": "III",
+    "diachi": "Cụm 8, Xã Cư Kbang, Huyện Ea Súp"
+  },
+  {
+    "huyen": "Huyện Ea Súp",
+    "xa": "Xã Cư Kbang",
+    "thon": "Cụm 9",
+    "khuvuc": "III",
+    "diachi": "Cụm 9, Xã Cư Kbang, Huyện Ea Súp"
+  },
+  {
+    "huyen": "Huyện Ea Súp",
+    "xa": "Xã Cư Kbang",
+    "thon": "Cụm 10",
+    "khuvuc": "III",
+    "diachi": "Cụm 10, Xã Cư Kbang, Huyện Ea Súp"
+  },
+  {
+    "huyen": "Huyện Ea Súp",
+    "xa": "Xã Cư Kbang",
+    "thon": "Thôn 11",
+    "khuvuc": "III",
+    "diachi": "Thôn 11, Xã Cư Kbang, Huyện Ea Súp"
+  },
+  {
+    "huyen": "Huyện Ea Súp",
+    "xa": "Xã Cư Kbang",
+    "thon": "Thôn 12",
+    "khuvuc": "III",
+    "diachi": "Thôn 12, Xã Cư Kbang, Huyện Ea Súp"
+  },
+  {
+    "huyen": "Huyện Ea Súp",
+    "xa": "Xã Cư Kbang",
+    "thon": "Thôn 14",
+    "khuvuc": "III",
+    "diachi": "Thôn 14, Xã Cư Kbang, Huyện Ea Súp"
+  },
+  {
+    "huyen": "Huyện Ea Súp",
+    "xa": "Xã Cư Kbang",
+    "thon": "Thôn 15",
+    "khuvuc": "III",
+    "diachi": "Thôn 15, Xã Cư Kbang, Huyện Ea Súp"
+  },
+  {
+    "huyen": "Huyện Ea Súp",
+    "xa": "Xã Cư Kbang",
+    "thon": "Thôn 16",
+    "khuvuc": "III",
+    "diachi": "Thôn 16, Xã Cư Kbang, Huyện Ea Súp"
+  },
+  {
+    "huyen": "Huyện Ea Súp",
+    "xa": "Xã Ea Rốk",
+    "thon": "Thôn 8",
+    "khuvuc": "III",
+    "diachi": "Thôn 8, Xã Ea Rốk, Huyện Ea Súp"
+  },
+  {
+    "huyen": "Huyện Ea Súp",
+    "xa": "Xã Ea Rốk",
+    "thon": "Thôn 9",
+    "khuvuc": "III",
+    "diachi": "Thôn 9, Xã Ea Rốk, Huyện Ea Súp"
+  },
+  {
+    "huyen": "Huyện Ea Súp",
+    "xa": "Xã Ea Rốk",
+    "thon": "Thôn 16",
+    "khuvuc": "III",
+    "diachi": "Thôn 16, Xã Ea Rốk, Huyện Ea Súp"
+  },
+  {
+    "huyen": "Huyện Ea Súp",
+    "xa": "Xã Ea Rốk",
+    "thon": "Thôn 19",
+    "khuvuc": "III",
+    "diachi": "Thôn 19, Xã Ea Rốk, Huyện Ea Súp"
+  },
+  {
+    "huyen": "Huyện Ea Súp",
+    "xa": "Xã Ea Rốk",
+    "thon": "Thôn 20",
+    "khuvuc": "III",
+    "diachi": "Thôn 20, Xã Ea Rốk, Huyện Ea Súp"
+  },
+  {
+    "huyen": "Huyện Ea Súp",
+    "xa": "Xã Ea Rốk",
+    "thon": "Thôn 21",
+    "khuvuc": "III",
+    "diachi": "Thôn 21, Xã Ea Rốk, Huyện Ea Súp"
+  },
+  {
+    "huyen": "Huyện Ea Súp",
+    "xa": "Xã Ea Rốk",
+    "thon": "Thôn 22",
+    "khuvuc": "III",
+    "diachi": "Thôn 22, Xã Ea Rốk, Huyện Ea Súp"
+  },
+  {
+    "huyen": "Huyện Ea Súp",
+    "xa": "Xã Ia Jlơi",
+    "thon": "Thôn 5",
+    "khuvuc": "III",
+    "diachi": "Thôn 5, Xã Ia Jlơi, Huyện Ea Súp"
+  },
+  {
+    "huyen": "Huyện Ea Súp",
+    "xa": "Xã Ia Jlơi",
+    "thon": "Thôn 6",
+    "khuvuc": "III",
+    "diachi": "Thôn 6, Xã Ia Jlơi, Huyện Ea Súp"
+  },
+  {
+    "huyen": "Huyện Ea Súp",
+    "xa": "Xã Ia Jlơi",
+    "thon": "Buôn Ba Na",
+    "khuvuc": "III",
+    "diachi": "Buôn Ba Na, Xã Ia Jlơi, Huyện Ea Súp"
+  },
+  {
+    "huyen": "Huyện Ea Súp",
+    "xa": "Xã Ea Lê",
+    "thon": "Thôn 10",
+    "khuvuc": "III",
+    "diachi": "Thôn 10, Xã Ea Lê, Huyện Ea Súp"
+  },
+  {
+    "huyen": "Huyện Ea Súp",
+    "xa": "Xã Ea Lê",
+    "thon": "Thôn 12",
+    "khuvuc": "III",
+    "diachi": "Thôn 12, Xã Ea Lê, Huyện Ea Súp"
+  },
+  {
+    "huyen": "Huyện Ea Súp",
+    "xa": "Xã Ea Lê",
+    "thon": "Thôn 15",
+    "khuvuc": "III",
+    "diachi": "Thôn 15, Xã Ea Lê, Huyện Ea Súp"
+  },
+  {
+    "huyen": "Huyện Ea Súp",
+    "xa": "Xã Ea Lê",
+    "thon": "Thôn 17",
+    "khuvuc": "III",
+    "diachi": "Thôn 17, Xã Ea Lê, Huyện Ea Súp"
+  },
+  {
+    "huyen": "Huyện Ea Súp",
+    "xa": "Xã Ea Lê",
+    "thon": "Thôn 18",
+    "khuvuc": "III",
+    "diachi": "Thôn 18, Xã Ea Lê, Huyện Ea Súp"
+  },
+  {
+    "huyen": "Huyện Ea Súp",
+    "xa": "Xã Ea Lê",
+    "thon": "Thôn 19",
+    "khuvuc": "III",
+    "diachi": "Thôn 19, Xã Ea Lê, Huyện Ea Súp"
+  },
+  {
+    "huyen": "Huyện Ea Súp",
+    "xa": "Xã Ea Lê",
+    "thon": "TK 249",
+    "khuvuc": "III",
+    "diachi": "TK 249, Xã Ea Lê, Huyện Ea Súp"
+  },
+  {
+    "huyen": "Huyện Ea Súp",
+    "xa": "Xã Ia Rvê",
+    "thon": "Thôn 5",
+    "khuvuc": "III",
+    "diachi": "Thôn 5, Xã Ia Rvê, Huyện Ea Súp"
+  },
+  {
+    "huyen": "Huyện Ea Súp",
+    "xa": "Xã Ia Rvê",
+    "thon": "Thôn 10",
+    "khuvuc": "III",
+    "diachi": "Thôn 10, Xã Ia Rvê, Huyện Ea Súp"
+  },
+  {
+    "huyen": "Huyện Ea Súp",
+    "xa": "Xã Ia Rvê",
+    "thon": "Thôn 11",
+    "khuvuc": "III",
+    "diachi": "Thôn 11, Xã Ia Rvê, Huyện Ea Súp"
+  },
+  {
+    "huyen": "Huyện Ea Súp",
+    "xa": "Xã Ia Rvê",
+    "thon": "Thôn 12",
+    "khuvuc": "III",
+    "diachi": "Thôn 12, Xã Ia Rvê, Huyện Ea Súp"
+  },
+  {
+    "huyen": "Huyện Ea Súp",
+    "xa": "Xã Ia Rvê",
+    "thon": "Thôn 13",
+    "khuvuc": "III",
+    "diachi": "Thôn 13, Xã Ia Rvê, Huyện Ea Súp"
+  },
+  {
+    "huyen": "Huyện Ea Súp",
+    "xa": "Xã Ya Tờ Mốt",
+    "thon": "Thôn 09",
+    "khuvuc": "III",
+    "diachi": "Thôn 09, Xã Ya Tờ Mốt, Huyện Ea Súp"
+  },
+  {
+    "huyen": "Huyện Ea Súp",
+    "xa": "Xã Ya Tờ Mốt",
+    "thon": "Thôn 10",
+    "khuvuc": "III",
+    "diachi": "Thôn 10, Xã Ya Tờ Mốt, Huyện Ea Súp"
+  },
+  {
+    "huyen": "Huyện Ea Súp",
+    "xa": "Xã Ya Tờ Mốt",
+    "thon": "Thôn 11",
+    "khuvuc": "III",
+    "diachi": "Thôn 11, Xã Ya Tờ Mốt, Huyện Ea Súp"
+  },
+  {
+    "huyen": "Huyện Ea Súp",
+    "xa": "Xã Ya Tờ Mốt",
+    "thon": "Thôn 12",
+    "khuvuc": "III",
+    "diachi": "Thôn 12, Xã Ya Tờ Mốt, Huyện Ea Súp"
+  },
+  {
+    "huyen": "Huyện Ea Súp",
+    "xa": "Xã Ia Lốp",
+    "thon": "Thôn Dự",
+    "khuvuc": "III",
+    "diachi": "Thôn Dự, Xã Ia Lốp, Huyện Ea Súp"
+  },
+  {
+    "huyen": "Huyện Ea Súp",
+    "xa": "Xã Ia Lốp",
+    "thon": "Thôn Án",
+    "khuvuc": "III",
+    "diachi": "Thôn Án, Xã Ia Lốp, Huyện Ea Súp"
+  },
+  {
+    "huyen": "Huyện Ea Súp",
+    "xa": "Xã Ia Lốp",
+    "thon": "Thôn Đoàn",
+    "khuvuc": "III",
+    "diachi": "Thôn Đoàn, Xã Ia Lốp, Huyện Ea Súp"
+  },
+  {
+    "huyen": "Huyện Ea Súp",
+    "xa": "Xã Ia Lốp",
+    "thon": "Thôn Chiềng",
+    "khuvuc": "III",
+    "diachi": "Thôn Chiềng, Xã Ia Lốp, Huyện Ea Súp"
+  },
+  {
+    "huyen": "Huyện Ea Súp",
+    "xa": "Xã Ia Lốp",
+    "thon": "Thôn Lầu Nàng",
+    "khuvuc": "III",
+    "diachi": "Thôn Lầu Nàng, Xã Ia Lốp, Huyện Ea Súp"
+  },
+  {
+    "huyen": "Huyện Ea Súp",
+    "xa": "Xã Ia Lốp",
+    "thon": "Thôn Đai Thôn",
+    "khuvuc": "III",
+    "diachi": "Thôn Đai Thôn, Xã Ia Lốp, Huyện Ea Súp"
+  },
+  {
+    "huyen": "Huyện Ea Súp",
+    "xa": "Xã Ia Lốp",
+    "thon": "Thôn Đóng",
+    "khuvuc": "III",
+    "diachi": "Thôn Đóng, Xã Ia Lốp, Huyện Ea Súp"
+  },
+  {
+    "huyen": "Huyện Ea Súp",
+    "xa": "Xã Ia Lốp",
+    "thon": "Thôn Thanh niên Lập nghiệp",
+    "khuvuc": "III",
+    "diachi": "Thôn Thanh niên Lập nghiệp, Xã Ia Lốp, Huyện Ea Súp"
+  },
+  {
+    "huyen": "Huyện Krông Pắc",
+    "xa": "Xã Êa Hiu",
+    "thon": "Buôn Jắt A",
+    "khuvuc": "III",
+    "diachi": "Buôn Jắt A, Xã Êa Hiu, Huyện Krông Pắc"
+  },
+  {
+    "huyen": "Huyện Krông Pắc",
+    "xa": "Xã Êa Hiu",
+    "thon": "Buôn Jắt B",
+    "khuvuc": "III",
+    "diachi": "Buôn Jắt B, Xã Êa Hiu, Huyện Krông Pắc"
+  },
+  {
+    "huyen": "Huyện Krông Pắc",
+    "xa": "Xã Êa Hiu",
+    "thon": "Buôn Roang Đơng",
+    "khuvuc": "III",
+    "diachi": "Buôn Roang Đơng, Xã Êa Hiu, Huyện Krông Pắc"
+  },
+  {
+    "huyen": "Huyện Krông Pắc",
+    "xa": "Xã Êa Hiu",
+    "thon": "Buôn Tà Rầu",
+    "khuvuc": "III",
+    "diachi": "Buôn Tà Rầu, Xã Êa Hiu, Huyện Krông Pắc"
+  },
+  {
+    "huyen": "Huyện Krông Pắc",
+    "xa": "Xã Êa Hiu",
+    "thon": "Buôn Ra Lu",
+    "khuvuc": "III",
+    "diachi": "Buôn Ra Lu, Xã Êa Hiu, Huyện Krông Pắc"
+  },
+  {
+    "huyen": "Huyện Krông Pắc",
+    "xa": "Xã Êa Hiu",
+    "thon": "Buôn Mò Ó",
+    "khuvuc": "III",
+    "diachi": "Buôn Mò Ó, Xã Êa Hiu, Huyện Krông Pắc"
+  },
+  {
+    "huyen": "Huyện Krông Pắc",
+    "xa": "Xã Êa Hiu",
+    "thon": "Buôn Tà Cỡng",
+    "khuvuc": "III",
+    "diachi": "Buôn Tà Cỡng, Xã Êa Hiu, Huyện Krông Pắc"
+  },
+  {
+    "huyen": "Huyện Krông Pắc",
+    "xa": "Xã Êa Hiu",
+    "thon": "Buôn Tà Đỗq",
+    "khuvuc": "III",
+    "diachi": "Buôn Tà Đỗq, Xã Êa Hiu, Huyện Krông Pắc"
+  },
+  {
+    "huyen": "Huyện Krông Pắc",
+    "xa": "Xã Vụ Bổn",
+    "thon": "Buôn Cư Kniêl",
+    "khuvuc": "III",
+    "diachi": "Buôn Cư Kniêl, Xã Vụ Bổn, Huyện Krông Pắc"
+  },
+  {
+    "huyen": "Huyện Krông Pắc",
+    "xa": "Xã Vụ Bổn",
+    "thon": "Buôn Ea Nong A",
+    "khuvuc": "III",
+    "diachi": "Buôn Ea Nong A, Xã Vụ Bổn, Huyện Krông Pắc"
+  },
+  {
+    "huyen": "Huyện Krông Pắc",
+    "xa": "Xã Vụ Bổn",
+    "thon": "Buôn Ea Nong B",
+    "khuvuc": "III",
+    "diachi": "Buôn Ea Nong B, Xã Vụ Bổn, Huyện Krông Pắc"
+  },
+  {
+    "huyen": "Huyện Krông Pắc",
+    "xa": "Xã Vụ Bổn",
+    "thon": "Buôn Krue",
+    "khuvuc": "III",
+    "diachi": "Buôn Krue, Xã Vụ Bổn, Huyện Krông Pắc"
+  },
+  {
+    "huyen": "Huyện Krông Pắc",
+    "xa": "Xã Vụ Bổn",
+    "thon": "Thôn Thanh Thủy",
+    "khuvuc": "III",
+    "diachi": "Thôn Thanh Thủy, Xã Vụ Bổn, Huyện Krông Pắc"
+  },
+  {
+    "huyen": "Huyện Krông Pắc",
+    "xa": "Xã Êa Uy",
+    "thon": "Buôn hàng 1c",
+    "khuvuc": "III",
+    "diachi": "Buôn hàng 1c, Xã Êa Uy, Huyện Krông Pắc"
+  },
+  {
+    "huyen": "Huyện Krông Pắc",
+    "xa": "Xã Êa Uy",
+    "thon": "Đăkrơ Leang 1",
+    "khuvuc": "III",
+    "diachi": "Đăkrơ Leang 1, Xã Êa Uy, Huyện Krông Pắc"
+  },
+  {
+    "huyen": "Huyện Krông Pắc",
+    "xa": "Xã Êa Uy",
+    "thon": "Buôn Hàng 1a",
+    "khuvuc": "III",
+    "diachi": "Buôn Hàng 1a, Xã Êa Uy, Huyện Krông Pắc"
+  },
+  {
+    "huyen": "Huyện Krông Pắc",
+    "xa": "Xã Tân Tiến",
+    "thon": "Buôn Kplang",
+    "khuvuc": "III",
+    "diachi": "Buôn Kplang, Xã Tân Tiến, Huyện Krông Pắc"
+  },
+  {
+    "huyen": "Huyện Krông Pắc",
+    "xa": "Xã Tân Tiến",
+    "thon": "Buôn Eadrai",
+    "khuvuc": "III",
+    "diachi": "Buôn Eadrai, Xã Tân Tiến, Huyện Krông Pắc"
+  },
+  {
+    "huyen": "Huyện Krông Pắc",
+    "xa": "Xã Tân Tiến",
+    "thon": "Buôn Eadrai A",
+    "khuvuc": "I",
+    "diachi": "Buôn Eadrai A, Xã Tân Tiến, Huyện Krông Pắc"
+  },
+  {
+    "huyen": "Huyện Krông Pắc",
+    "xa": "Xã Êa Phê",
+    "thon": "Buôn Ea Su",
+    "khuvuc": "I",
+    "diachi": "Buôn Ea Su, Xã Êa Phê, Huyện Krông Pắc"
+  },
+  {
+    "huyen": "Huyện Krông Pắc",
+    "xa": "Xã Êa Yiêng",
+    "thon": "Buôn Ea Mao",
+    "khuvuc": "I",
+    "diachi": "Buôn Ea Mao, Xã Êa Yiêng, Huyện Krông Pắc"
+  },
+  {
+    "huyen": "Huyện Krông Pắc",
+    "xa": "Xã Êa Yiêng",
+    "thon": "Buôn Kon Tay",
+    "khuvuc": "I",
+    "diachi": "Buôn Kon Tay, Xã Êa Yiêng, Huyện Krông Pắc"
+  },
+  {
+    "huyen": "Huyện Krông Pắc",
+    "xa": "Xã Êa Yiêng",
+    "thon": "Buôn Cư Đrang",
+    "khuvuc": "I",
+    "diachi": "Buôn Cư Đrang, Xã Êa Yiêng, Huyện Krông Pắc"
+  },
+  {
+    "huyen": "Huyện Krông Pắc",
+    "xa": "Xã Êa Yiêng",
+    "thon": "Buôn Kon Wang",
+    "khuvuc": "I",
+    "diachi": "Buôn Kon Wang, Xã Êa Yiêng, Huyện Krông Pắc"
+  },
+  {
+    "huyen": "Huyện Krông Pắc",
+    "xa": "Xã Êa Yiêng",
+    "thon": "Buôn Kon Hring",
+    "khuvuc": "I",
+    "diachi": "Buôn Kon Hring, Xã Êa Yiêng, Huyện Krông Pắc"
+  },
+  {
+    "huyen": "Huyện Krông Pắc",
+    "xa": "Xã Krông Búk",
+    "thon": "Buôn Ea Oh",
+    "khuvuc": "III",
+    "diachi": "Buôn Ea Oh, Xã Krông Búk, Huyện Krông Pắc"
+  },
+  {
+    "huyen": "Huyện Krông Pắc",
+    "xa": "Xã Krông Búk",
+    "thon": "Buôn Mbê",
+    "khuvuc": "III",
+    "diachi": "Buôn Mbê, Xã Krông Búk, Huyện Krông Pắc"
+  },
+  {
+    "huyen": "Huyện Lắk",
+    "xa": "Thị trấn Liên Sơn",
+    "thon": "Buôn Lê",
+    "khuvuc": "III",
+    "diachi": "Buôn Lê, Thị trấn Liên Sơn, Huyện Lắk"
+  },
+  {
+    "huyen": "Huyện Lắk",
+    "xa": "Thị trấn Liên Sơn",
+    "thon": "Buôn Jun",
+    "khuvuc": "III",
+    "diachi": "Buôn Jun, Thị trấn Liên Sơn, Huyện Lắk"
+  },
+  {
+    "huyen": "Huyện Lắk",
+    "xa": "Thị trấn Liên Sơn",
+    "thon": "Buôn Dơng Kriêng",
+    "khuvuc": "I",
+    "diachi": "Buôn Dơng Kriêng, Thị trấn Liên Sơn, Huyện Lắk"
+  },
+  {
+    "huyen": "Huyện Lắk",
+    "xa": "Xã Yang Tao",
+    "thon": "Buôn Drung",
+    "khuvuc": "I",
+    "diachi": "Buôn Drung, Xã Yang Tao, Huyện Lắk"
+  },
+  {
+    "huyen": "Huyện Lắk",
+    "xa": "Xã Yang Tao",
+    "thon": "Buôn Cuôr",
+    "khuvuc": "I",
+    "diachi": "Buôn Cuôr, Xã Yang Tao, Huyện Lắk"
+  },
+  {
+    "huyen": "Huyện Lắk",
+    "xa": "Xã Yang Tao",
+    "thon": "Buôn Cuôr tak",
+    "khuvuc": "I",
+    "diachi": "Buôn Cuôr tak, Xã Yang Tao, Huyện Lắk"
+  },
+  {
+    "huyen": "Huyện Lắk",
+    "xa": "Xã Yang Tao",
+    "thon": "Buôn Bhôk",
+    "khuvuc": "I",
+    "diachi": "Buôn Bhôk, Xã Yang Tao, Huyện Lắk"
+  },
+  {
+    "huyen": "Huyện Lắk",
+    "xa": "Xã Yang Tao",
+    "thon": "Buôn Yôk Đuôn",
+    "khuvuc": "I",
+    "diachi": "Buôn Yôk Đuôn, Xã Yang Tao, Huyện Lắk"
+  },
+  {
+    "huyen": "Huyện Lắk",
+    "xa": "Xã Yang Tao",
+    "thon": "Buôn Dơng Băk",
+    "khuvuc": "I",
+    "diachi": "Buôn Dơng Băk, Xã Yang Tao, Huyện Lắk"
+  },
+  {
+    "huyen": "Huyện Lắk",
+    "xa": "Xã Yang Tao",
+    "thon": "Buôn Biăp",
+    "khuvuc": "III",
+    "diachi": "Buôn Biăp, Xã Yang Tao, Huyện Lắk"
+  },
+  {
+    "huyen": "Huyện Lắk",
+    "xa": "Xã Yang Tao",
+    "thon": "Buôn Dơng Guôl",
+    "khuvuc": "III",
+    "diachi": "Buôn Dơng Guôl, Xã Yang Tao, Huyện Lắk"
+  },
+  {
+    "huyen": "Huyện Lắk",
+    "xa": "Xã Yang Tao",
+    "thon": "Buôn Dơng Yang",
+    "khuvuc": "III",
+    "diachi": "Buôn Dơng Yang, Xã Yang Tao, Huyện Lắk"
+  },
+  {
+    "huyen": "Huyện Lắk",
+    "xa": "Xã Yang Tao",
+    "thon": "Buôn Năm Pă",
+    "khuvuc": "III",
+    "diachi": "Buôn Năm Pă, Xã Yang Tao, Huyện Lắk"
+  },
+  {
+    "huyen": "Huyện Lắk",
+    "xa": "Xã Bông Krang",
+    "thon": "Buôn Mă",
+    "khuvuc": "III",
+    "diachi": "Buôn Mă, Xã Bông Krang, Huyện Lắk"
+  },
+  {
+    "huyen": "Huyện Lắk",
+    "xa": "Xã Bông Krang",
+    "thon": "Buôn Thái",
+    "khuvuc": "III",
+    "diachi": "Buôn Thái, Xã Bông Krang, Huyện Lắk"
+  },
+  {
+    "huyen": "Huyện Lắk",
+    "xa": "Xã Bông Krang",
+    "thon": "Buôn Dar Ju",
+    "khuvuc": "III",
+    "diachi": "Buôn Dar Ju, Xã Bông Krang, Huyện Lắk"
+  },
+  {
+    "huyen": "Huyện Lắk",
+    "xa": "Xã Bông Krang",
+    "thon": "Buôn Ja",
+    "khuvuc": "III",
+    "diachi": "Buôn Ja, Xã Bông Krang, Huyện Lắk"
+  },
+  {
+    "huyen": "Huyện Lắk",
+    "xa": "Xã Bông Krang",
+    "thon": "Buôn Hang Ja",
+    "khuvuc": "III",
+    "diachi": "Buôn Hang Ja, Xã Bông Krang, Huyện Lắk"
+  },
+  {
+    "huyen": "Huyện Lắk",
+    "xa": "Xã Bông Krang",
+    "thon": "Buôn Yang Kring",
+    "khuvuc": "III",
+    "diachi": "Buôn Yang Kring, Xã Bông Krang, Huyện Lắk"
+  },
+  {
+    "huyen": "Huyện Lắk",
+    "xa": "Xã Bông Krang",
+    "thon": "Buôn Krai",
+    "khuvuc": "III",
+    "diachi": "Buôn Krai, Xã Bông Krang, Huyện Lắk"
+  },
+  {
+    "huyen": "Huyện Lắk",
+    "xa": "Xã Bông Krang",
+    "thon": "Buôn Diêo",
+    "khuvuc": "III",
+    "diachi": "Buôn Diêo, Xã Bông Krang, Huyện Lắk"
+  },
+  {
+    "huyen": "Huyện Lắk",
+    "xa": "Xã Bông Krang",
+    "thon": "Buôn Yơn",
+    "khuvuc": "III",
+    "diachi": "Buôn Yơn, Xã Bông Krang, Huyện Lắk"
+  },
+  {
+    "huyen": "Huyện Lắk",
+    "xa": "Xã Bông Krang",
+    "thon": "Buôn Sruông",
+    "khuvuc": "III",
+    "diachi": "Buôn Sruông, Xã Bông Krang, Huyện Lắk"
+  },
+  {
+    "huyen": "Huyện Lắk",
+    "xa": "Xã Đăk Liêng",
+    "thon": "Buôn Kam",
+    "khuvuc": "III",
+    "diachi": "Buôn Kam, Xã Đăk Liêng, Huyện Lắk"
+  },
+  {
+    "huyen": "Huyện Lắk",
+    "xa": "Xã Đăk Liêng",
+    "thon": "Buôn Bàng",
+    "khuvuc": "III",
+    "diachi": "Buôn Bàng, Xã Đăk Liêng, Huyện Lắk"
+  },
+  {
+    "huyen": "Huyện Lắk",
+    "xa": "Xã Đăk Liêng",
+    "thon": "Buôn Yuk",
+    "khuvuc": "III",
+    "diachi": "Buôn Yuk, Xã Đăk Liêng, Huyện Lắk"
+  },
+  {
+    "huyen": "Huyện Lắk",
+    "xa": "Xã Đăk Liêng",
+    "thon": "Buôn Tơr",
+    "khuvuc": "III",
+    "diachi": "Buôn Tơr, Xã Đăk Liêng, Huyện Lắk"
+  },
+  {
+    "huyen": "Huyện Lắk",
+    "xa": "Xã Đăk Liêng",
+    "thon": "Buôn Drễn A",
+    "khuvuc": "III",
+    "diachi": "Buôn Drễn A, Xã Đăk Liêng, Huyện Lắk"
+  },
+  {
+    "huyen": "Huyện Lắk",
+    "xa": "Xã Đăk Liêng",
+    "thon": "Buôn Drễn B",
+    "khuvuc": "III",
+    "diachi": "Buôn Drễn B, Xã Đăk Liêng, Huyện Lắk"
+  },
+  {
+    "huyen": "Huyện Lắk",
+    "xa": "Xã Đăk Liêng",
+    "thon": "Buôn Yang Lah 1",
+    "khuvuc": "III",
+    "diachi": "Buôn Yang Lah 1, Xã Đăk Liêng, Huyện Lắk"
+  },
+  {
+    "huyen": "Huyện Lắk",
+    "xa": "Xã Đăk Liêng",
+    "thon": "Buôn Yang Lah 2",
+    "khuvuc": "III",
+    "diachi": "Buôn Yang Lah 2, Xã Đăk Liêng, Huyện Lắk"
+  },
+  {
+    "huyen": "Huyện Lắk",
+    "xa": "Xã Đăk Liêng",
+    "thon": "Buôn Yuk La 3",
+    "khuvuc": "III",
+    "diachi": "Buôn Yuk La 3, Xã Đăk Liêng, Huyện Lắk"
+  },
+  {
+    "huyen": "Huyện Lắk",
+    "xa": "Buôn Triết",
+    "thon": "Buôn K Nắc",
+    "khuvuc": "III",
+    "diachi": "Buôn K Nắc, Buôn Triết, Huyện Lắk"
+  },
+  {
+    "huyen": "Huyện Lắk",
+    "xa": "Buôn Triết",
+    "thon": "Buôn Ung Rung 1",
+    "khuvuc": "III",
+    "diachi": "Buôn Ung Rung 1, Buôn Triết, Huyện Lắk"
+  },
+  {
+    "huyen": "Huyện Lắk",
+    "xa": "Buôn Triết",
+    "thon": "Buôn Ung Rung 2",
+    "khuvuc": "III",
+    "diachi": "Buôn Ung Rung 2, Buôn Triết, Huyện Lắk"
+  },
+  {
+    "huyen": "Huyện Lắk",
+    "xa": "Buôn Triết",
+    "thon": "Buôn Ja Tu",
+    "khuvuc": "III",
+    "diachi": "Buôn Ja Tu, Buôn Triết, Huyện Lắk"
+  },
+  {
+    "huyen": "Huyện Lắk",
+    "xa": "Buôn Triết",
+    "thon": "Buôn Lắc Rung",
+    "khuvuc": "II",
+    "diachi": "Buôn Lắc Rung, Buôn Triết, Huyện Lắk"
+  },
+  {
+    "huyen": "Huyện Lắk",
+    "xa": "Buôn Triết",
+    "thon": "Buôn Tung 3",
+    "khuvuc": "II",
+    "diachi": "Buôn Tung 3, Buôn Triết, Huyện Lắk"
+  },
+  {
+    "huyen": "Huyện Lắk",
+    "xa": "Xã Đăk Phơi",
+    "thon": "Buôn Chiêng Kao",
+    "khuvuc": "III",
+    "diachi": "Buôn Chiêng Kao, Xã Đăk Phơi, Huyện Lắk"
+  },
+  {
+    "huyen": "Huyện Lắk",
+    "xa": "Xã Đăk Phơi",
+    "thon": "Buôn Liêng Ông",
+    "khuvuc": "III",
+    "diachi": "Buôn Liêng Ông, Xã Đăk Phơi, Huyện Lắk"
+  },
+  {
+    "huyen": "Huyện Lắk",
+    "xa": "Xã Đăk Phơi",
+    "thon": "Buôn Pai Ar",
+    "khuvuc": "III",
+    "diachi": "Buôn Pai Ar, Xã Đăk Phơi, Huyện Lắk"
+  },
+  {
+    "huyen": "Huyện Lắk",
+    "xa": "Xã Đăk Phơi",
+    "thon": "Buôn Jiê Yuk",
+    "khuvuc": "III",
+    "diachi": "Buôn Jiê Yuk, Xã Đăk Phơi, Huyện Lắk"
+  },
+  {
+    "huyen": "Huyện Lắk",
+    "xa": "Xã Đăk Phơi",
+    "thon": "Buôn Liêng Keh",
+    "khuvuc": "III",
+    "diachi": "Buôn Liêng Keh, Xã Đăk Phơi, Huyện Lắk"
+  },
+  {
+    "huyen": "Huyện Lắk",
+    "xa": "Xã Đăk Phơi",
+    "thon": "Buôn Du Mah",
+    "khuvuc": "III",
+    "diachi": "Buôn Du Mah, Xã Đăk Phơi, Huyện Lắk"
+  },
+  {
+    "huyen": "Huyện Lắk",
+    "xa": "Xã Đăk Phơi",
+    "thon": "Buôn Năm",
+    "khuvuc": "III",
+    "diachi": "Buôn Năm, Xã Đăk Phơi, Huyện Lắk"
+  },
+  {
+    "huyen": "Huyện Lắk",
+    "xa": "Xã Đăk Phơi",
+    "thon": "Buôn Tlông",
+    "khuvuc": "III",
+    "diachi": "Buôn Tlông, Xã Đăk Phơi, Huyện Lắk"
+  },
+  {
+    "huyen": "Huyện Lắk",
+    "xa": "Xã Đăk Phơi",
+    "thon": "Buôn Đung",
+    "khuvuc": "III",
+    "diachi": "Buôn Đung, Xã Đăk Phơi, Huyện Lắk"
+  },
+  {
+    "huyen": "Huyện Lắk",
+    "xa": "Đăk Nuê",
+    "thon": "Buôn Dhăm I",
+    "khuvuc": "III",
+    "diachi": "Buôn Dhăm I, Đăk Nuê, Huyện Lắk"
+  },
+  {
+    "huyen": "Huyện Lắk",
+    "xa": "Đăk Nuê",
+    "thon": "Buôn Mih",
+    "khuvuc": "III",
+    "diachi": "Buôn Mih, Đăk Nuê, Huyện Lắk"
+  },
+  {
+    "huyen": "Huyện Lắk",
+    "xa": "Đăk Nuê",
+    "thon": "Buôn Triêk",
+    "khuvuc": "III",
+    "diachi": "Buôn Triêk, Đăk Nuê, Huyện Lắk"
+  },
+  {
+    "huyen": "Huyện Lắk",
+    "xa": "Đăk Nuê",
+    "thon": "Buôn Kdiê I",
+    "khuvuc": "III",
+    "diachi": "Buôn Kdiê I, Đăk Nuê, Huyện Lắk"
+  },
+  {
+    "huyen": "Huyện Lắk",
+    "xa": "Đăk Nuê",
+    "thon": "Buôn Kdiê II",
+    "khuvuc": "III",
+    "diachi": "Buôn Kdiê II, Đăk Nuê, Huyện Lắk"
+  },
+  {
+    "huyen": "Huyện Lắk",
+    "xa": "Đăk Nuê",
+    "thon": "Buôn Yơl",
+    "khuvuc": "III",
+    "diachi": "Buôn Yơl, Đăk Nuê, Huyện Lắk"
+  },
+  {
+    "huyen": "Huyện Lắk",
+    "xa": "Đăk Nuê",
+    "thon": "Buôn Pai Bi",
+    "khuvuc": "III",
+    "diachi": "Buôn Pai Bi, Đăk Nuê, Huyện Lắk"
+  },
+  {
+    "huyen": "Huyện Lắk",
+    "xa": "Đăk Nuê",
+    "thon": "Buôn Dlây",
+    "khuvuc": "III",
+    "diachi": "Buôn Dlây, Đăk Nuê, Huyện Lắk"
+  },
+  {
+    "huyen": "Huyện Lắk",
+    "xa": "Đăk Nuê",
+    "thon": "Buôn Đăk Sar",
+    "khuvuc": "III",
+    "diachi": "Buôn Đăk Sar, Đăk Nuê, Huyện Lắk"
+  },
+  {
+    "huyen": "Huyện Lắk",
+    "xa": "Xã Nam Ka",
+    "thon": "Buôn Tusria",
+    "khuvuc": "III",
+    "diachi": "Buôn Tusria, Xã Nam Ka, Huyện Lắk"
+  },
+  {
+    "huyen": "Huyện Lắk",
+    "xa": "Xã Nam Ka",
+    "thon": "Buôn Buôč",
+    "khuvuc": "III",
+    "diachi": "Buôn Buôč, Xã Nam Ka, Huyện Lắk"
+  },
+  {
+    "huyen": "Huyện Lắk",
+    "xa": "Xã Nam Ka",
+    "thon": "Buôn Krái",
+    "khuvuc": "III",
+    "diachi": "Buôn Krái, Xã Nam Ka, Huyện Lắk"
+  },
+  {
+    "huyen": "Huyện Lắk",
+    "xa": "Xã Nam Ka",
+    "thon": "Buôn Lách Ló",
+    "khuvuc": "III",
+    "diachi": "Buôn Lách Ló, Xã Nam Ka, Huyện Lắk"
+  },
+  {
+    "huyen": "Huyện Lắk",
+    "xa": "Xã Ea R'bin",
+    "thon": "Buôn Ea R'bin",
+    "khuvuc": "III",
+    "diachi": "Buôn Ea R'bin, Xã Ea R'bin, Huyện Lắk"
+  },
+  {
+    "huyen": "Huyện Lắk",
+    "xa": "Xã Ea R'bin",
+    "thon": "Buôn Phôk",
+    "khuvuc": "III",
+    "diachi": "Buôn Phôk, Xã Ea R'bin, Huyện Lắk"
+  },
+  {
+    "huyen": "Huyện Lắk",
+    "xa": "Xã Ea R'bin",
+    "thon": "Buôn Plao Siêng",
+    "khuvuc": "III",
+    "diachi": "Buôn Plao Siêng, Xã Ea R'bin, Huyện Lắk"
+  },
+  {
+    "huyen": "Huyện Lắk",
+    "xa": "Xã Ea R'bin",
+    "thon": "Buôn Ea Ring",
+    "khuvuc": "III",
+    "diachi": "Buôn Ea Ring, Xã Ea R'bin, Huyện Lắk"
+  },
+  {
+    "huyen": "Huyện Lắk",
+    "xa": "Xã Ea R'bin",
+    "thon": "Buôn Sa Bôk",
+    "khuvuc": "III",
+    "diachi": "Buôn Sa Bôk, Xã Ea R'bin, Huyện Lắk"
+  },
+  {
+    "huyen": "Huyện Lắk",
+    "xa": "Xã Krông Nô",
+    "thon": "Buôn Ba Yang",
+    "khuvuc": "III",
+    "diachi": "Buôn Ba Yang, Xã Krông Nô, Huyện Lắk"
+  },
+  {
+    "huyen": "Huyện Lắk",
+    "xa": "Xã Krông Nô",
+    "thon": "Buôn Gung Dang",
+    "khuvuc": "III",
+    "diachi": "Buôn Gung Dang, Xã Krông Nô, Huyện Lắk"
+  },
+  {
+    "huyen": "Huyện Lắk",
+    "xa": "Xã Krông Nô",
+    "thon": "Buôn Plôm",
+    "khuvuc": "III",
+    "diachi": "Buôn Plôm, Xã Krông Nô, Huyện Lắk"
+  },
+  {
+    "huyen": "Huyện Lắk",
+    "xa": "Xã Krông Nô",
+    "thon": "Buôn Lach Dơng",
+    "khuvuc": "III",
+    "diachi": "Buôn Lach Dơng, Xã Krông Nô, Huyện Lắk"
+  },
+  {
+    "huyen": "Huyện Lắk",
+    "xa": "Xã Krông Nô",
+    "thon": "Buôn ĐăkTro",
+    "khuvuc": "III",
+    "diachi": "Buôn ĐăkTro, Xã Krông Nô, Huyện Lắk"
+  },
+  {
+    "huyen": "Huyện Lắk",
+    "xa": "Xã Krông Nô",
+    "thon": "Buôn Phi Dih Ja B",
+    "khuvuc": "III",
+    "diachi": "Buôn Phi Dih Ja B, Xã Krông Nô, Huyện Lắk"
+  },
+  {
+    "huyen": "Huyện Lắk",
+    "xa": "Xã Krông Nô",
+    "thon": "Buôn Phi Dih Ja A",
+    "khuvuc": "III",
+    "diachi": "Buôn Phi Dih Ja A, Xã Krông Nô, Huyện Lắk"
+  },
+  {
+    "huyen": "Huyện Lắk",
+    "xa": "Xã Krông Nô",
+    "thon": "Buôn ĐăkRMưt",
+    "khuvuc": "III",
+    "diachi": "Buôn ĐăkRMưt, Xã Krông Nô, Huyện Lắk"
+  },
+  {
+    "huyen": "Huyện Lắk",
+    "xa": "Xã Krông Nô",
+    "thon": "Buôn R Cai B",
+    "khuvuc": "III",
+    "diachi": "Buôn R Cai B, Xã Krông Nô, Huyện Lắk"
+  },
+  {
+    "huyen": "Huyện Lắk",
+    "xa": "Xã Krông Nô",
+    "thon": "Buôn R Cai A",
+    "khuvuc": "III",
+    "diachi": "Buôn R Cai A, Xã Krông Nô, Huyện Lắk"
+  },
+  {
+    "huyen": "Huyện Lắk",
+    "xa": "Xã Krông Nô",
+    "thon": "Buôn Yông Hăt",
+    "khuvuc": "III",
+    "diachi": "Buôn Yông Hăt, Xã Krông Nô, Huyện Lắk"
+  },
+  {
+    "huyen": "Huyện Lắk",
+    "xa": "Xã Krông Nô",
+    "thon": "Buôn Trang Yuk",
+    "khuvuc": "III",
+    "diachi": "Buôn Trang Yuk, Xã Krông Nô, Huyện Lắk"
+  },
+  {
+    "huyen": "Huyện Lắk",
+    "xa": "Xã Krông Nô",
+    "thon": "Buôn Liêng Krắk",
+    "khuvuc": "III",
+    "diachi": "Buôn Liêng Krắk, Xã Krông Nô, Huyện Lắk"
+  },
+  {
+    "huyen": "Huyện M'Drắk",
+    "xa": "Xã Ea MĐoal",
+    "thon": "Thôn 4",
+    "khuvuc": "III",
+    "diachi": "Thôn 4, Xã Ea MĐoal, Huyện M'Drắk"
+  },
+  {
+    "huyen": "Huyện M'Drắk",
+    "xa": "Xã Ea Lai",
+    "thon": "Buôn CưPrao",
+    "khuvuc": "III",
+    "diachi": "Buôn CưPrao, Xã Ea Lai, Huyện M'Drắk"
+  },
+  {
+    "huyen": "Huyện M'Drắk",
+    "xa": "Xã Ea Pil",
+    "thon": "Thôn 1",
+    "khuvuc": "III",
+    "diachi": "Thôn 1, Xã Ea Pil, Huyện M'Drắk"
+  },
+  {
+    "huyen": "Huyện M'Drắk",
+    "xa": "Xã Krông Á",
+    "thon": "Thôn 3",
+    "khuvuc": "III",
+    "diachi": "Thôn 3, Xã Krông Á, Huyện M'Drắk"
+  },
+  {
+    "huyen": "Huyện M'Drắk",
+    "xa": "Xã Krông Á",
+    "thon": "Thôn 4",
+    "khuvuc": "II",
+    "diachi": "Thôn 4, Xã Krông Á, Huyện M'Drắk"
+  },
+  {
+    "huyen": "Huyện M'Drắk",
+    "xa": "Xã Krông Á",
+    "thon": "Thôn 5",
+    "khuvuc": "II",
+    "diachi": "Thôn 5, Xã Krông Á, Huyện M'Drắk"
+  },
+  {
+    "huyen": "Huyện M'Drắk",
+    "xa": "Xã Krông Á",
+    "thon": "Thôn 6",
+    "khuvuc": "II",
+    "diachi": "Thôn 6, Xã Krông Á, Huyện M'Drắk"
+  },
+  {
+    "huyen": "Huyện M'Drắk",
+    "xa": "Xã Krông Á",
+    "thon": "Thôn 7",
+    "khuvuc": "II",
+    "diachi": "Thôn 7, Xã Krông Á, Huyện M'Drắk"
+  },
+  {
+    "huyen": "Huyện M'Drắk",
+    "xa": "Xã Ea Trang",
+    "thon": "Buôn Thi",
+    "khuvuc": "III",
+    "diachi": "Buôn Thi, Xã Ea Trang, Huyện M'Drắk"
+  },
+  {
+    "huyen": "Huyện M'Drắk",
+    "xa": "Xã Ea Trang",
+    "thon": "Buôn M Bơn A",
+    "khuvuc": "III",
+    "diachi": "Buôn M Bơn A, Xã Ea Trang, Huyện M'Drắk"
+  },
+  {
+    "huyen": "Huyện M'Drắk",
+    "xa": "Xã Ea Trang",
+    "thon": "Buôn M Bơn B",
+    "khuvuc": "III",
+    "diachi": "Buôn M Bơn B, Xã Ea Trang, Huyện M'Drắk"
+  },
+  {
+    "huyen": "Huyện M'Drắk",
+    "xa": "Xã Ea Trang",
+    "thon": "Buôn M Liă",
+    "khuvuc": "III",
+    "diachi": "Buôn M Liă, Xã Ea Trang, Huyện M'Drắk"
+  },
+  {
+    "huyen": "Huyện M'Drắk",
+    "xa": "Xã Ea Trang",
+    "thon": "Buôn M DLơk",
+    "khuvuc": "III",
+    "diachi": "Buôn M DLơk, Xã Ea Trang, Huyện M'Drắk"
+  },
+  {
+    "huyen": "Huyện M'Drắk",
+    "xa": "Xã Ea Trang",
+    "thon": "Thôn Ea Boa",
+    "khuvuc": "III",
+    "diachi": "Thôn Ea Boa, Xã Ea Trang, Huyện M'Drắk"
+  },
+  {
+    "huyen": "Huyện M'Drắk",
+    "xa": "Xã Ea Trang",
+    "thon": "Buôn M Hạp",
+    "khuvuc": "III",
+    "diachi": "Buôn M Hạp, Xã Ea Trang, Huyện M'Drắk"
+  },
+  {
+    "huyen": "Huyện M'Drắk",
+    "xa": "Xã Ea Trang",
+    "thon": "Buôn M yui",
+    "khuvuc": "III",
+    "diachi": "Buôn M yui, Xã Ea Trang, Huyện M'Drắk"
+  },
+  {
+    "huyen": "Huyện M'Drắk",
+    "xa": "Xã Ea Trang",
+    "thon": "Buôn Mgơm",
+    "khuvuc": "III",
+    "diachi": "Buôn Mgơm, Xã Ea Trang, Huyện M'Drắk"
+  },
+  {
+    "huyen": "Huyện M'Drắk",
+    "xa": "Xã Ea Trang",
+    "thon": "Thôn Ea Bra",
+    "khuvuc": "III",
+    "diachi": "Thôn Ea Bra, Xã Ea Trang, Huyện M'Drắk"
+  },
+  {
+    "huyen": "Huyện M'Drắk",
+    "xa": "Xã Ea Trang",
+    "thon": "Buôn MO",
+    "khuvuc": "III",
+    "diachi": "Buôn MO, Xã Ea Trang, Huyện M'Drắk"
+  },
+  {
+    "huyen": "Huyện M'Drắk",
+    "xa": "Xã Ea Trang",
+    "thon": "Buôn Mjam",
+    "khuvuc": "III",
+    "diachi": "Buôn Mjam, Xã Ea Trang, Huyện M'Drắk"
+  },
+  {
+    "huyen": "Huyện M'Drắk",
+    "xa": "Xã Ea Trang",
+    "thon": "Buôn Mguê",
+    "khuvuc": "III",
+    "diachi": "Buôn Mguê, Xã Ea Trang, Huyện M'Drắk"
+  },
+  {
+    "huyen": "Huyện M'Drắk",
+    "xa": "Xã Krông Jing",
+    "thon": "Buôn Tai",
+    "khuvuc": "III",
+    "diachi": "Buôn Tai, Xã Krông Jing, Huyện M'Drắk"
+  },
+  {
+    "huyen": "Huyện M'Drắk",
+    "xa": "Xã Krông Jing",
+    "thon": "Buôn Ae Lai",
+    "khuvuc": "III",
+    "diachi": "Buôn Ae Lai, Xã Krông Jing, Huyện M'Drắk"
+  },
+  {
+    "huyen": "Huyện M'Drắk",
+    "xa": "Xã Krông Jing",
+    "thon": "Buôn M'Um",
+    "khuvuc": "III",
+    "diachi": "Buôn M'Um, Xã Krông Jing, Huyện M'Drắk"
+  },
+  {
+    "huyen": "Huyện M'Drắk",
+    "xa": "Xã Krông Jing",
+    "thon": "Buôn Ae Ta Lu",
+    "khuvuc": "III",
+    "diachi": "Buôn Ae Ta Lu, Xã Krông Jing, Huyện M'Drắk"
+  },
+  {
+    "huyen": "Huyện M'Drắk",
+    "xa": "Xã Krông Jing",
+    "thon": "Buôn M'Trơng",
+    "khuvuc": "III",
+    "diachi": "Buôn M'Trơng, Xã Krông Jing, Huyện M'Drắk"
+  },
+  {
+    "huyen": "Huyện M'Drắk",
+    "xa": "Xã Krông Jing",
+    "thon": "Buôn M'Suốt",
+    "khuvuc": "III",
+    "diachi": "Buôn M'Suốt, Xã Krông Jing, Huyện M'Drắk"
+  },
+  {
+    "huyen": "Huyện M'Drắk",
+    "xa": "Xã Krông Jing",
+    "thon": "Buôn M'Găm",
+    "khuvuc": "III",
+    "diachi": "Buôn M'Găm, Xã Krông Jing, Huyện M'Drắk"
+  },
+  {
+    "huyen": "Huyện M'Drắk",
+    "xa": "Xã Krông Jing",
+    "thon": "Buôn Hoang",
+    "khuvuc": "III",
+    "diachi": "Buôn Hoang, Xã Krông Jing, Huyện M'Drắk"
+  },
+  {
+    "huyen": "Huyện M'Drắk",
+    "xa": "Xã Krông Jing",
+    "thon": "Buôn Bik",
+    "khuvuc": "III",
+    "diachi": "Buôn Bik, Xã Krông Jing, Huyện M'Drắk"
+  },
+  {
+    "huyen": "Huyện M'Drắk",
+    "xa": "Xã Krông Jing",
+    "thon": "Buôn G Lăn",
+    "khuvuc": "III",
+    "diachi": "Buôn G Lăn, Xã Krông Jing, Huyện M'Drắk"
+  },
+  {
+    "huyen": "Huyện M'Drắk",
+    "xa": "Xã Krông Jing",
+    "thon": "Buôn Ea H'M Lai",
+    "khuvuc": "III",
+    "diachi": "Buôn Ea H'M Lai, Xã Krông Jing, Huyện M'Drắk"
+  },
+  {
+    "huyen": "Huyện M'Drắk",
+    "xa": "Xã Krông Jing",
+    "thon": "Buôn Cuăh",
+    "khuvuc": "III",
+    "diachi": "Buôn Cuăh, Xã Krông Jing, Huyện M'Drắk"
+  },
+  {
+    "huyen": "Huyện M'Drắk",
+    "xa": "Xã Krông Jing",
+    "thon": "Buôn M'Lốch A",
+    "khuvuc": "III",
+    "diachi": "Buôn M'Lốch A, Xã Krông Jing, Huyện M'Drắk"
+  },
+  {
+    "huyen": "Huyện M'Drắk",
+    "xa": "Xã Krông Jing",
+    "thon": "Buôn M'Lốch B",
+    "khuvuc": "III",
+    "diachi": "Buôn M'Lốch B, Xã Krông Jing, Huyện M'Drắk"
+  },
+  {
+    "huyen": "Huyện M'Drắk",
+    "xa": "Xã Cư MTa",
+    "thon": "Thôn 18",
+    "khuvuc": "III",
+    "diachi": "Thôn 18, Xã Cư MTa, Huyện M'Drắk"
+  },
+  {
+    "huyen": "Huyện M'Drắk",
+    "xa": "Xã Cư MTa",
+    "thon": "Buôn Phao",
+    "khuvuc": "III",
+    "diachi": "Buôn Phao, Xã Cư MTa, Huyện M'Drắk"
+  },
+  {
+    "huyen": "Huyện M'Drắk",
+    "xa": "Xã Cư MTa",
+    "thon": "Buôn Đưk",
+    "khuvuc": "III",
+    "diachi": "Buôn Đưk, Xã Cư MTa, Huyện M'Drắk"
+  },
+  {
+    "huyen": "Huyện M'Drắk",
+    "xa": "Xã Cư MTa",
+    "thon": "Buôn Hí",
+    "khuvuc": "III",
+    "diachi": "Buôn Hí, Xã Cư MTa, Huyện M'Drắk"
+  },
+  {
+    "huyen": "Huyện M'Drắk",
+    "xa": "Xã Cư MTa",
+    "thon": "Buôn Hai",
+    "khuvuc": "III",
+    "diachi": "Buôn Hai, Xã Cư MTa, Huyện M'Drắk"
+  },
+  {
+    "huyen": "Huyện M'Drắk",
+    "xa": "Xã Cư MTa",
+    "thon": "Buôn Đăk",
+    "khuvuc": "III",
+    "diachi": "Buôn Đăk, Xã Cư MTa, Huyện M'Drắk"
+  },
+  {
+    "huyen": "Huyện M'Drắk",
+    "xa": "Xã Cư MTa",
+    "thon": "Buôn Năng",
+    "khuvuc": "III",
+    "diachi": "Buôn Năng, Xã Cư MTa, Huyện M'Drắk"
+  },
+  {
+    "huyen": "Huyện M'Drắk",
+    "xa": "Xã Cư MTa",
+    "thon": "Buôn Gõ",
+    "khuvuc": "III",
+    "diachi": "Buôn Gõ, Xã Cư MTa, Huyện M'Drắk"
+  },
+  {
+    "huyen": "Huyện M'Drắk",
+    "xa": "Xã Cư MTa",
+    "thon": "Buôn Leng",
+    "khuvuc": "III",
+    "diachi": "Buôn Leng, Xã Cư MTa, Huyện M'Drắk"
+  },
+  {
+    "huyen": "Huyện M'Drắk",
+    "xa": "Xã Cư MTa",
+    "thon": "Buôn Ăk",
+    "khuvuc": "III",
+    "diachi": "Buôn Ăk, Xã Cư MTa, Huyện M'Drắk"
+  },
+  {
+    "huyen": "Huyện M'Drắk",
+    "xa": "Xã Cư Prao",
+    "thon": "Thôn 5",
+    "khuvuc": "III",
+    "diachi": "Thôn 5, Xã Cư Prao, Huyện M'Drắk"
+  },
+  {
+    "huyen": "Huyện M'Drắk",
+    "xa": "Xã Cư Prao",
+    "thon": "Thôn 6",
+    "khuvuc": "III",
+    "diachi": "Thôn 6, Xã Cư Prao, Huyện M'Drắk"
+  },
+  {
+    "huyen": "Huyện M'Drắk",
+    "xa": "Xã Cư Prao",
+    "thon": "Thôn 7",
+    "khuvuc": "III",
+    "diachi": "Thôn 7, Xã Cư Prao, Huyện M'Drắk"
+  },
+  {
+    "huyen": "Huyện M'Drắk",
+    "xa": "Xã Cư Prao",
+    "thon": "Đăk phú",
+    "khuvuc": "III",
+    "diachi": "Đăk phú, Xã Cư Prao, Huyện M'Drắk"
+  },
+  {
+    "huyen": "Huyện M'Drắk",
+    "xa": "Xã Cư Prao",
+    "thon": "Buôn zô",
+    "khuvuc": "III",
+    "diachi": "Buôn zô, Xã Cư Prao, Huyện M'Drắk"
+  },
+  {
+    "huyen": "Huyện M'Drắk",
+    "xa": "Xã Cư Prao",
+    "thon": "Buôn pa",
+    "khuvuc": "III",
+    "diachi": "Buôn pa, Xã Cư Prao, Huyện M'Drắk"
+  },
+  {
+    "huyen": "Huyện M'Drắk",
+    "xa": "Xã Cư Prao",
+    "thon": "Buôn năng",
+    "khuvuc": "III",
+    "diachi": "Buôn năng, Xã Cư Prao, Huyện M'Drắk"
+  },
+  {
+    "huyen": "Huyện M'Drắk",
+    "xa": "Xã Cư Prao",
+    "thon": "Buôn hoang",
+    "khuvuc": "III",
+    "diachi": "Buôn hoang, Xã Cư Prao, Huyện M'Drắk"
+  },
+  {
+    "huyen": "Huyện M'Drắk",
+    "xa": "Xã Cư Kroă",
+    "thon": "Thôn 7",
+    "khuvuc": "III",
+    "diachi": "Thôn 7, Xã Cư Kroă, Huyện M'Drắk"
+  },
+  {
+    "huyen": "Huyện M'Drắk",
+    "xa": "Xã Cư Kroă",
+    "thon": "Thôn 8",
+    "khuvuc": "III",
+    "diachi": "Thôn 8, Xã Cư Kroă, Huyện M'Drắk"
+  },
+  {
+    "huyen": "Huyện M'Drắk",
+    "xa": "Xã Cư Kroă",
+    "thon": "Thôn 9",
+    "khuvuc": "III",
+    "diachi": "Thôn 9, Xã Cư Kroă, Huyện M'Drắk"
+  },
+  {
+    "huyen": "Huyện M'Drắk",
+    "xa": "Xã Cư San",
+    "thon": "Thôn 4",
+    "khuvuc": "III",
+    "diachi": "Thôn 4, Xã Cư San, Huyện M'Drắk"
+  },
+  {
+    "huyen": "Huyện M'Drắk",
+    "xa": "Xã Cư San",
+    "thon": "Thôn 5",
+    "khuvuc": "III",
+    "diachi": "Thôn 5, Xã Cư San, Huyện M'Drắk"
+  },
+  {
+    "huyen": "Huyện M'Drắk",
+    "xa": "Xã Cư San",
+    "thon": "Thôn 6",
+    "khuvuc": "III",
+    "diachi": "Thôn 6, Xã Cư San, Huyện M'Drắk"
+  },
+  {
+    "huyen": "Huyện M'Drắk",
+    "xa": "Xã Cư San",
+    "thon": "Thôn 7",
+    "khuvuc": "III",
+    "diachi": "Thôn 7, Xã Cư San, Huyện M'Drắk"
+  },
+  {
+    "huyen": "Huyện M'Drắk",
+    "xa": "Xã Cư San",
+    "thon": "Thôn 8",
+    "khuvuc": "III",
+    "diachi": "Thôn 8, Xã Cư San, Huyện M'Drắk"
+  },
+  {
+    "huyen": "Huyện M'Drắk",
+    "xa": "Xã Cư San",
+    "thon": "Thôn 9",
+    "khuvuc": "III",
+    "diachi": "Thôn 9, Xã Cư San, Huyện M'Drắk"
+  },
+  {
+    "huyen": "Huyện M'Drắk",
+    "xa": "Xã Cư San",
+    "thon": "Thôn 10",
+    "khuvuc": "III",
+    "diachi": "Thôn 10, Xã Cư San, Huyện M'Drắk"
+  },
+  {
+    "huyen": "Huyện M'Drắk",
+    "xa": "Xã Cư San",
+    "thon": "Thôn 11",
+    "khuvuc": "III",
+    "diachi": "Thôn 11, Xã Cư San, Huyện M'Drắk"
+  },
+  {
+    "huyen": "Huyện M'Drắk",
+    "xa": "Xã Cư San",
+    "thon": "Thôn Ea Sanh",
+    "khuvuc": "III",
+    "diachi": "Thôn Ea Sanh, Xã Cư San, Huyện M'Drắk"
+  },
+  {
+    "huyen": "Huyện M'Drắk",
+    "xa": "Xã Cư San",
+    "thon": "Thôn Ea Krông",
+    "khuvuc": "III",
+    "diachi": "Thôn Ea Krông, Xã Cư San, Huyện M'Drắk"
+  },
+  {
+    "huyen": "Huyện M'Drắk",
+    "xa": "Xã Cư San",
+    "thon": "Thôn Tăk Drung",
+    "khuvuc": "III",
+    "diachi": "Thôn Tăk Drung, Xã Cư San, Huyện M'Drắk"
+  },
+  {
+    "huyen": "Huyện M'Drắk",
+    "xa": "Xã Cư San",
+    "thon": "Thôn Sông Chò",
+    "khuvuc": "III",
+    "diachi": "Thôn Sông Chò, Xã Cư San, Huyện M'Drắk"
+  },
+  {
+    "huyen": "Thị xã Buôn Hồ",
+    "xa": "Xã Ea Drông",
+    "thon": "Buôn Ea Kjoh A",
+    "khuvuc": "III",
+    "diachi": "Buôn Ea Kjoh A, Xã Ea Drông, Thị xã Buôn Hồ"
+  },
+  {
+    "huyen": "Thị xã Buôn Hồ",
+    "xa": "Xã Ea Drông",
+    "thon": "Thôn 8",
+    "khuvuc": "III",
+    "diachi": "Thôn 8, Xã Ea Drông, Thị xã Buôn Hồ"
+  },
+  {
+    "huyen": "Thị xã Buôn Hồ",
+    "xa": "Xã Ea Siên",
+    "thon": "Thôn 2A",
+    "khuvuc": "III",
+    "diachi": "Thôn 2A, Xã Ea Siên, Thị xã Buôn Hồ"
+  },
+  {
+    "huyen": "Huyện Krông Năng",
+    "xa": "Xã Cư Klông",
+    "thon": "Thôn Tam Hợp",
+    "khuvuc": "I",
+    "diachi": "Thôn Tam Hợp, Xã Cư Klông, Huyện Krông Năng"
+  },
+  {
+    "huyen": "Huyện Krông Năng",
+    "xa": "Xã Cư Klông",
+    "thon": "Thôn Cư Klông",
+    "khuvuc": "I",
+    "diachi": "Thôn Cư Klông, Xã Cư Klông, Huyện Krông Năng"
+  },
+  {
+    "huyen": "Huyện Krông Năng",
+    "xa": "Xã Cư Klông",
+    "thon": "Thôn Ea Ngah",
+    "khuvuc": "I",
+    "diachi": "Thôn Ea Ngah, Xã Cư Klông, Huyện Krông Năng"
+  },
+  {
+    "huyen": "Huyện Krông Năng",
+    "xa": "Xã Cư Klông",
+    "thon": "Thôn Ea Bir",
+    "khuvuc": "I",
+    "diachi": "Thôn Ea Bir, Xã Cư Klông, Huyện Krông Năng"
+  },
+  {
+    "huyen": "Huyện Krông Năng",
+    "xa": "Xã Dliêya",
+    "thon": "Buôn Kmang",
+    "khuvuc": "I",
+    "diachi": "Buôn Kmang, Xã Dliêya, Huyện Krông Năng"
+  },
+  {
+    "huyen": "Huyện Krông Năng",
+    "xa": "Xã Dliêya",
+    "thon": "Buôn Yoh",
+    "khuvuc": "III",
+    "diachi": "Buôn Yoh, Xã Dliêya, Huyện Krông Năng"
+  },
+  {
+    "huyen": "Huyện Krông Năng",
+    "xa": "Xã Dliêya",
+    "thon": "Buôn Yun",
+    "khuvuc": "III",
+    "diachi": "Buôn Yun, Xã Dliêya, Huyện Krông Năng"
+  },
+  {
+    "huyen": "Huyện Krông Năng",
+    "xa": "Xã Dliêya",
+    "thon": "Buôn Ea Dua",
+    "khuvuc": "III",
+    "diachi": "Buôn Ea Dua, Xã Dliêya, Huyện Krông Năng"
+  },
+  {
+    "huyen": "Huyện Krông Năng",
+    "xa": "Xã Dliêya",
+    "thon": "Buôn Juk",
+    "khuvuc": "III",
+    "diachi": "Buôn Juk, Xã Dliêya, Huyện Krông Năng"
+  },
+  {
+    "huyen": "Huyện Krông Năng",
+    "xa": "Xã Dliêya",
+    "thon": "Thôn Tân Hiệp",
+    "khuvuc": "III",
+    "diachi": "Thôn Tân Hiệp, Xã Dliêya, Huyện Krông Năng"
+  },
+  {
+    "huyen": "Huyện Krông Năng",
+    "xa": "Xã Dliêya",
+    "thon": "Thôn Ea Lê",
+    "khuvuc": "II",
+    "diachi": "Thôn Ea Lê, Xã Dliêya, Huyện Krông Năng"
+  },
+  {
+    "huyen": "Huyện Krông Năng",
+    "xa": "Xã Dliêya",
+    "thon": "Buôn Tleh",
+    "khuvuc": "II",
+    "diachi": "Buôn Tleh, Xã Dliêya, Huyện Krông Năng"
+  },
+  {
+    "huyen": "Huyện Krông Năng",
+    "xa": "Xã Dliêya",
+    "thon": "Buôn Dliêya A",
+    "khuvuc": "II",
+    "diachi": "Buôn Dliêya A, Xã Dliêya, Huyện Krông Năng"
+  },
+  {
+    "huyen": "Huyện Krông Năng",
+    "xa": "Xã Dliêya",
+    "thon": "Thôn Ea Tu",
+    "khuvuc": "II",
+    "diachi": "Thôn Ea Tu, Xã Dliêya, Huyện Krông Năng"
+  },
+  {
+    "huyen": "Huyện Krông Năng",
+    "xa": "Xã Ea Dăh",
+    "thon": "Thôn Giang Đông",
+    "khuvuc": "II",
+    "diachi": "Thôn Giang Đông, Xã Ea Dăh, Huyện Krông Năng"
+  },
+  {
+    "huyen": "Huyện Krông Năng",
+    "xa": "Xã Ea Dăh",
+    "thon": "Thôn Giang Thanh",
+    "khuvuc": "II",
+    "diachi": "Thôn Giang Thanh, Xã Ea Dăh, Huyện Krông Năng"
+  },
+  {
+    "huyen": "Huyện Krông Năng",
+    "xa": "Xã Ea Dăh",
+    "thon": "Thôn Giang Thành",
+    "khuvuc": "II",
+    "diachi": "Thôn Giang Thành, Xã Ea Dăh, Huyện Krông Năng"
+  },
+  {
+    "huyen": "Huyện Krông Năng",
+    "xa": "Xã Ea Dăh",
+    "thon": "Thôn Giang Châu",
+    "khuvuc": "II",
+    "diachi": "Thôn Giang Châu, Xã Ea Dăh, Huyện Krông Năng"
+  },
+  {
+    "huyen": "Huyện Krông Năng",
+    "xa": "Xã Ea Dăh",
+    "thon": "Thôn Xuân Lạng 1",
+    "khuvuc": "II",
+    "diachi": "Thôn Xuân Lạng 1, Xã Ea Dăh, Huyện Krông Năng"
+  },
+  {
+    "huyen": "Huyện Krông Năng",
+    "xa": "Xã Ea Dăh",
+    "thon": "Thôn Xuân Thanh",
+    "khuvuc": "III",
+    "diachi": "Thôn Xuân Thanh, Xã Ea Dăh, Huyện Krông Năng"
+  },
+  {
+    "huyen": "Huyện Krông Năng",
+    "xa": "Xã Ea Dăh",
+    "thon": "Thôn Xuân Nguyên",
+    "khuvuc": "III",
+    "diachi": "Thôn Xuân Nguyên, Xã Ea Dăh, Huyện Krông Năng"
+  },
+  {
+    "huyen": "Huyện Krông Năng",
+    "xa": "Xã Ea Hồ",
+    "thon": "Buôn Mngoan",
+    "khuvuc": "III",
+    "diachi": "Buôn Mngoan, Xã Ea Hồ, Huyện Krông Năng"
+  },
+  {
+    "huyen": "Huyện Krông Năng",
+    "xa": "Xã Ea Hồ",
+    "thon": "Buôn Alê",
+    "khuvuc": "III",
+    "diachi": "Buôn Alê, Xã Ea Hồ, Huyện Krông Năng"
+  },
+  {
+    "huyen": "Huyện Krông Năng",
+    "xa": "Xã Ea Hồ",
+    "thon": "Buôn Mrưm",
+    "khuvuc": "III",
+    "diachi": "Buôn Mrưm, Xã Ea Hồ, Huyện Krông Năng"
+  },
+  {
+    "huyen": "Huyện Krông Năng",
+    "xa": "Xã Ea Hồ",
+    "thon": "Buôn Trang",
+    "khuvuc": "III",
+    "diachi": "Buôn Trang, Xã Ea Hồ, Huyện Krông Năng"
+  },
+  {
+    "huyen": "Huyện Krông Năng",
+    "xa": "Xã Ea Hồ",
+    "thon": "Buôn Sú",
+    "khuvuc": "III",
+    "diachi": "Buôn Sú, Xã Ea Hồ, Huyện Krông Năng"
+  },
+  {
+    "huyen": "Huyện Krông Năng",
+    "xa": "Xã Ea Hồ",
+    "thon": "Buôn Năng",
+    "khuvuc": "III",
+    "diachi": "Buôn Năng, Xã Ea Hồ, Huyện Krông Năng"
+  },
+  {
+    "huyen": "Huyện Krông Năng",
+    "xa": "Xã Ea Hồ",
+    "thon": "Buôn Hồ A",
+    "khuvuc": "III",
+    "diachi": "Buôn Hồ A, Xã Ea Hồ, Huyện Krông Năng"
+  },
+  {
+    "huyen": "Huyện Krông Năng",
+    "xa": "Xã Ea Hồ",
+    "thon": "Buôn Hồ B",
+    "khuvuc": "III",
+    "diachi": "Buôn Hồ B, Xã Ea Hồ, Huyện Krông Năng"
+  },
+  {
+    "huyen": "Huyện Krông Năng",
+    "xa": "Xã Ea Hồ",
+    "thon": "Buôn Đê",
+    "khuvuc": "III",
+    "diachi": "Buôn Đê, Xã Ea Hồ, Huyện Krông Năng"
+  },
+  {
+    "huyen": "Huyện Krông Năng",
+    "xa": "Xã Ea Hồ",
+    "thon": "Buôn Wik",
+    "khuvuc": "III",
+    "diachi": "Buôn Wik, Xã Ea Hồ, Huyện Krông Năng"
+  },
+  {
+    "huyen": "Huyện Krông Năng",
+    "xa": "Xã Ea Hồ",
+    "thon": "Buôn Giêr",
+    "khuvuc": "III",
+    "diachi": "Buôn Giêr, Xã Ea Hồ, Huyện Krông Năng"
+  },
+  {
+    "huyen": "Huyện Krông Năng",
+    "xa": "Xã Ea Puk",
+    "thon": "Thôn Giang Minh",
+    "khuvuc": "III",
+    "diachi": "Thôn Giang Minh, Xã Ea Puk, Huyện Krông Năng"
+  },
+  {
+    "huyen": "Huyện Krông Năng",
+    "xa": "Xã Ea Puk",
+    "thon": "Thôn Giang Đại",
+    "khuvuc": "III",
+    "diachi": "Thôn Giang Đại, Xã Ea Puk, Huyện Krông Năng"
+  },
+  {
+    "huyen": "Huyện Krông Năng",
+    "xa": "Xã Ea Puk",
+    "thon": "Thôn Giang Tiến",
+    "khuvuc": "III",
+    "diachi": "Thôn Giang Tiến, Xã Ea Puk, Huyện Krông Năng"
+  },
+  {
+    "huyen": "Huyện Krông Năng",
+    "xa": "Xã Ea Tam",
+    "thon": "Buôn Trăp",
+    "khuvuc": "III",
+    "diachi": "Buôn Trăp, Xã Ea Tam, Huyện Krông Năng"
+  },
+  {
+    "huyen": "Huyện Krông Năng",
+    "xa": "Xã Tam Giang",
+    "thon": "Thôn Giang Thọ",
+    "khuvuc": "III",
+    "diachi": "Thôn Giang Thọ, Xã Tam Giang, Huyện Krông Năng"
+  },
+  {
+    "huyen": "Huyện Krông Pắc",
+    "xa": "Xã Vụ Bổn",
+    "thon": "Buôn Ea Nông",
+    "khuvuc": "I",
+    "diachi": "Buôn Ea Nông, Xã Vụ Bổn, Huyện Krông Pắc"
+  },
+  {
+    "huyen": "Huyện Krông Năng",
+    "xa": "Xã Vụ Bổn",
+    "thon": "Buôn Ea Nông",
+    "khuvuc": "I",
+    "diachi": "Buôn Ea Nông, Xã Vụ Bổn, Huyện Krông Năng"
+  },
+  {
+    "huyen": "Huyện Krông Năng",
+    "xa": "Xã Ea Hồ",
+    "thon": "Buôn Ea Nông",
+    "khuvuc": "I",
+    "diachi": "Buôn Ea Nông, Xã Ea Hồ, Huyện Krông Năng"
+  },
+  {
+    "huyen": "Huyện Krông Năng",
+    "xa": "Xã Ea Hồ",
+    "thon": "Buôn Hô",
+    "khuvuc": "I",
+    "diachi": "Buôn Hô, Xã Ea Hồ, Huyện Krông Năng"
+  },
+  {
+    "huyen": "Huyện Lắk",
+    "xa": "Xã Ea Hồ",
+    "thon": "Buôn Hô",
+    "khuvuc": "I",
+    "diachi": "Buôn Hô, Xã Ea Hồ, Huyện Lắk"
+  },
+  {
+    "huyen": "Huyện Lắk",
+    "xa": "Xã Đăk Liêng",
+    "thon": "Buôn Hô",
+    "khuvuc": "I",
+    "diachi": "Buôn Hô, Xã Đăk Liêng, Huyện Lắk"
+  },
+  {
+    "huyen": "Huyện Lắk",
+    "xa": "Xã Đăk Liêng",
+    "thon": "Buôn Mliêng",
+    "khuvuc": "I",
+    "diachi": "Buôn Mliêng, Xã Đăk Liêng, Huyện Lắk"
+  },
+  {
+    "huyen": "Huyện Lắk",
+    "xa": "Xã Đăk Liêng",
+    "thon": "Buôn Yuk La",
+    "khuvuc": "I",
+    "diachi": "Buôn Yuk La, Xã Đăk Liêng, Huyện Lắk"
+  },
+  {
+    "huyen": "Thị Xã Buôn Hồ",
+    "xa": "Xã Đăk Liêng",
+    "thon": "Buôn Yuk La",
+    "khuvuc": "I",
+    "diachi": "Buôn Yuk La, Xã Đăk Liêng, Thị Xã Buôn Hồ"
+  },
+  {
+    "huyen": "Thị Xã Buôn Hồ",
+    "xa": "Xã Ea Siên",
+    "thon": "Buôn Yuk La",
+    "khuvuc": "I",
+    "diachi": "Buôn Yuk La, Xã Ea Siên, Thị Xã Buôn Hồ"
+  },
+  {
+    "huyen": "Thị Xã Buôn Hồ",
+    "xa": "Xã Ea Siên",
+    "thon": "Thôn 6",
+    "khuvuc": "I",
+    "diachi": "Thôn 6, Xã Ea Siên, Thị Xã Buôn Hồ"
+  },
+  {
+    "huyen": "Huyện Ea Kar",
+    "xa": "Xã Ea Siên",
+    "thon": "Thôn 6",
+    "khuvuc": "I",
+    "diachi": "Thôn 6, Xã Ea Siên, Huyện Ea Kar"
+  },
+  {
+    "huyen": "Huyện Ea Kar",
+    "xa": "Xã Cư Elang",
+    "thon": "Thôn 6",
+    "khuvuc": "I",
+    "diachi": "Thôn 6, Xã Cư Elang, Huyện Ea Kar"
+  },
+  {
+    "huyen": "Huyện Ea Kar",
+    "xa": "Xã Cư Elang",
+    "thon": "Thôn Yang San",
+    "khuvuc": "I",
+    "diachi": "Thôn Yang San, Xã Cư Elang, Huyện Ea Kar"
+  },
+  {
+    "huyen": "Huyện M'Drắk",
+    "xa": "Xã Cư Elang",
+    "thon": "Thôn Yang San",
+    "khuvuc": "I",
+    "diachi": "Thôn Yang San, Xã Cư Elang, Huyện M'Drắk"
+  },
+  {
+    "huyen": "Huyện M'Drắk",
+    "xa": "Xã Ea Trang",
+    "thon": "Thôn Yang San",
+    "khuvuc": "I",
+    "diachi": "Thôn Yang San, Xã Ea Trang, Huyện M'Drắk"
+  },
+  {
+    "huyen": "Huyện M'Drắk",
+    "xa": "Xã Ea Trang",
+    "thon": "Buôn M'Bơn",
+    "khuvuc": "I",
+    "diachi": "Buôn M'Bơn, Xã Ea Trang, Huyện M'Drắk"
+  },
+  {
+    "huyen": "Huyện M'Drắk",
+    "xa": "Xã Krông Jing",
+    "thon": "Buôn M'Bơn",
+    "khuvuc": "I",
+    "diachi": "Buôn M'Bơn, Xã Krông Jing, Huyện M'Drắk"
+  },
+  {
+    "huyen": "Huyện M'Drắk",
+    "xa": "Xã Krông Jing",
+    "thon": "Buôn KCuah Ea HM'Lai",
+    "khuvuc": "I",
+    "diachi": "Buôn KCuah Ea HM'Lai, Xã Krông Jing, Huyện M'Drắk"
+  },
+  {
+    "huyen": "Huyện M'Drắk",
+    "xa": "Xã Krông Jing",
+    "thon": "Buôn Nhang AeTlu",
+    "khuvuc": "I",
+    "diachi": "Buôn Nhang AeTlu, Xã Krông Jing, Huyện M'Drắk"
+  },
+  {
+    "huyen": "Huyện M'Drắk",
+    "xa": "Xã Cư M'ta",
+    "thon": "Buôn Hí - Đứk",
+    "khuvuc": "I",
+    "diachi": "Buôn Hí - Đứk, Xã Cư M'ta, Huyện M'Drắk"
+  },
+  {
+    "huyen": "Huyện M'Drắk",
+    "xa": "Xã Cư M'ta",
+    "thon": "Buôn Gõ - Năng",
+    "khuvuc": "I",
+    "diachi": "Buôn Gõ - Năng, Xã Cư M'ta, Huyện M'Drắk"
+  },
+  {
+    "huyen": "Huyện Krông Bông",
+    "xa": "Xã Yang Mao",
+    "thon": "Buôn M'nang Tar",
+    "khuvuc": "I",
+    "diachi": "Buôn M'nang Tar, Xã Yang Mao, Huyện Krông Bông"
+  },
+  {
+    "huyen": "Huyện Krông Bông",
+    "xa": "Xã Yang Mao",
+    "thon": "Buôn Chố Kuanh",
+    "khuvuc": "I",
+    "diachi": "Buôn Chố Kuanh, Xã Yang Mao, Huyện Krông Bông"
+  },
+  {
+    "huyen": "Huyện Krông Bông",
+    "xa": "Xã Yang Reh",
+    "thon": "Buôn Cuăh",
+    "khuvuc": "I",
+    "diachi": "Buôn Cuăh, Xã Yang Reh, Huyện Krông Bông"
+  },
+  {
+    "huyen": "Huyện Ea Súp",
+    "xa": "Xã Cư Kbang",
+    "thon": "Thôn 5",
+    "khuvuc": "I",
+    "diachi": "Thôn 5, Xã Cư Kbang, Huyện Ea Súp"
+  },
+  {
+    "huyen": "Huyện Ea Súp",
+    "xa": "Xã Ea Rốk",
+    "thon": "Thôn 3",
+    "khuvuc": "I",
+    "diachi": "Thôn 3, Xã Ea Rốk, Huyện Ea Súp"
+  },
+  {
+    "huyen": "Huyện Ea Súp",
+    "xa": "Xã Ea Rốk",
+    "thon": "Thôn 4",
+    "khuvuc": "I",
+    "diachi": "Thôn 4, Xã Ea Rốk, Huyện Ea Súp"
+  },
+  {
+    "huyen": "Huyện Ea Súp",
+    "xa": "Xã Ia Rvê",
+    "thon": "Thôn 2",
+    "khuvuc": "I",
+    "diachi": "Thôn 2, Xã Ia Rvê, Huyện Ea Súp"
+  },
+  {
+    "huyen": "Huyện Ea Súp",
+    "xa": "Xã Ia Lốp",
+    "thon": "Thôn Đừng Nhạp",
+    "khuvuc": "I",
+    "diachi": "Thôn Đừng Nhạp, Xã Ia Lốp, Huyện Ea Súp"
+  },
+  {
+    "huyen": "Huyện Ea H'Leo",
+    "xa": "Xã Ea Tir",
+    "thon": "Buôn Tiêu",
+    "khuvuc": "I",
+    "diachi": "Buôn Tiêu, Xã Ea Tir, Huyện Ea H'Leo"
+  },
+  {
+    "huyen": "Huyện Ea H'Leo",
+    "xa": "Xã Ea Sol",
+    "thon": "Buôn Krái",
+    "khuvuc": "I",
+    "diachi": "Buôn Krái, Xã Ea Sol, Huyện Ea H'Leo"
+  },
+  {
+    "huyen": "Huyện Buôn Đôn",
+    "xa": "Xã Krông Na",
+    "thon": "Buôn Trí",
+    "khuvuc": "I",
+    "diachi": "Buôn Trí, Xã Krông Na, Huyện Buôn Đôn"
+  },
+  {
+    "huyen": "Huyện Buôn Đôn",
+    "xa": "Xã Ea Huar",
+    "thon": "Buôn Ndrếch",
+    "khuvuc": "I",
+    "diachi": "Buôn Ndrếch, Xã Ea Huar, Huyện Buôn Đôn"
+  },
+  {
+    "huyen": "Huyện Buôn Đôn",
+    "xa": "Xã Ea Wer",
+    "thon": "Thôn 4",
+    "khuvuc": "I",
+    "diachi": "Thôn 4, Xã Ea Wer, Huyện Buôn Đôn"
+  }
+            // ... các mục dữ liệu khác
+        ];
+
+        // Khởi tạo trang
+        document.addEventListener('DOMContentLoaded', function() {
+            populateDropdowns();
+            searchData(); // Hiển thị tất cả dữ liệu ban đầu
+        });
+
+        // Điền dữ liệu vào dropdown
+        function populateDropdowns() {
+            const huyenSelect = document.getElementById('huyen');
+            const xaSelect = document.getElementById('xa');
+            
+            // Lấy danh sách huyện duy nhất
+            const huyenList = [...new Set(data.map(item => item.huyen))].sort();
+            
+            // Thêm options vào dropdown huyện
+            huyenList.forEach(huyen => {
+                const option = document.createElement('option');
+                option.value = huyen;
+                option.textContent = huyen;
+                huyenSelect.appendChild(option);
+            });
+            
+            // Thêm sự kiện thay đổi cho dropdown huyện
+            huyenSelect.addEventListener('change', function() {
+                const selectedHuyen = this.value;
+                xaSelect.innerHTML = '<option value="">Tất cả</option>';
+                
+                if (selectedHuyen) {
+                    // Lấy danh sách xã tương ứng với huyện được chọn
+                    const xaList = [...new Set(data
+                        .filter(item => item.huyen === selectedHuyen)
+                        .map(item => item.xa))].sort();
+                    
+                    // Thêm options vào dropdown xã
+                    xaList.forEach(xa => {
+                        const option = document.createElement('option');
+                        option.value = xa;
+                        option.textContent = xa;
+                        xaSelect.appendChild(option);
+                    });
+                }
+                
+                searchData();
+            });
+            
+            // Thêm sự kiện thay đổi cho dropdown xã và khu vực
+            xaSelect.addEventListener('change', searchData);
+            document.getElementById('khuvuc').addEventListener('change', searchData);
+        }
+
+        // Hàm tìm kiếm
+        function searchData() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const selectedHuyen = document.getElementById('huyen').value;
+            const selectedXa = document.getElementById('xa').value;
+            const selectedKhuvuc = document.getElementById('khuvuc').value;
+            
+            // Lọc dữ liệu
+            let filteredData = data.filter(item => {
+                const matchesSearch = item.thon.toLowerCase().includes(searchTerm) || 
+                                    item.diachi.toLowerCase().includes(searchTerm);
+                const matchesHuyen = !selectedHuyen || item.huyen === selectedHuyen;
+                const matchesXa = !selectedXa || item.xa === selectedXa;
+                const matchesKhuvuc = !selectedKhuvuc || item.khuvuc === selectedKhuvuc;
+                
+                return matchesSearch && matchesHuyen && matchesXa && matchesKhuvuc;
+            });
+            
+            // Hiển thị kết quả
+            displayResults(filteredData);
+        }
+
+        // Hiển thị kết quả
+        function displayResults(results) {
+            const resultsTable = document.getElementById('resultsTable');
+            const resultCount = document.getElementById('resultCount');
+            
+            resultCount.textContent = `Tìm thấy ${results.length} kết quả`;
+            
+            if (results.length === 0) {
+                resultsTable.innerHTML = '<div class="no-results">Không tìm thấy kết quả phù hợp</div>';
+                return;
+            }
+            
+            // Tạo bảng kết quả
+            let tableHTML = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>STT</th>
+                            <th>Thôn/Buôn</th>
+                            <th>Xã/Phường</th>
+                            <th>Huyện/Thị xã</th>
+                            <th>Khu vực</th>
+                            <th>Địa chỉ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            results.forEach((item, index) => {
+                tableHTML += `
+                    <tr class="khuvuc-${item.khuvuc}">
+                        <td>${index + 1}</td>
+                        <td>${item.thon}</td>
+                        <td>${item.xa}</td>
+                        <td>${item.huyen}</td>
+                        <td>${item.khuvuc}</td>
+                        <td>${item.diachi}</td>
+                    </tr>
+                `;
+            });
+            
+            tableHTML += `
+                    </tbody>
+                </table>
+            `;
+            
+            resultsTable.innerHTML = tableHTML;
+        }
+
+        // Xuất ra Excel
+        function exportToExcel() {
+            // Lấy dữ liệu hiện tại đang hiển thị
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const selectedHuyen = document.getElementById('huyen').value;
+            const selectedXa = document.getElementById('xa').value;
+            const selectedKhuvuc = document.getElementById('khuvuc').value;
+            
+            let filteredData = data.filter(item => {
+                const matchesSearch = item.thon.toLowerCase().includes(searchTerm) || 
+                                    item.diachi.toLowerCase().includes(searchTerm);
+                const matchesHuyen = !selectedHuyen || item.huyen === selectedHuyen;
+                const matchesXa = !selectedXa || item.xa === selectedXa;
+                const matchesKhuvuc = !selectedKhuvuc || item.khuvuc === selectedKhuvuc;
+                
+                return matchesSearch && matchesHuyen && matchesXa && matchesKhuvuc;
+            });
+            
+            if (filteredData.length === 0) {
+                alert('Không có dữ liệu để xuất!');
+                return;
+            }
+            
+            // Tạo nội dung CSV
+            let csvContent = "STT,Thôn/Buôn,Xã/Phường,Huyện/Thị xã,Khu vực,Địa chỉ\n";
+            
+            filteredData.forEach((item, index) => {
+                csvContent += `${index + 1},"${item.thon}","${item.xa}","${item.huyen}","${item.khuvuc}","${item.diachi}"\n`;
+            });
+            
+            // Tạo file và tải xuống
+            const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.setAttribute('href', url);
+            link.setAttribute('download', 'danh_sach_khu_vuc_daklak.csv');
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Tìm kiếm khi nhấn Enter
+        document.getElementById('searchInput').addEventListener('keyup', function(event) {
+            if (event.key === 'Enter') {
+                searchData();
+            }
+        });
+    </script>
+</body>
+</html>
