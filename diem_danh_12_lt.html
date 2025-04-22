@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Form điểm danh</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    label { display: block; margin-top: 10px; }
+    select, button { padding: 8px; margin-top: 5px; width: 250px; }
+    table { margin-top: 20px; border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+    .actions { margin-top: 15px; }
+  </style>
+</head>
+<body>
+
+  <h2>Form điểm danh học sinh</h2>
+
+  <label for="classSelect">Chọn lớp:</label>
+  <select id="classSelect">
+    <option value="">-- Chọn lớp --</option>
+  </select>
+
+  <label for="studentSelect">Chọn học sinh:</label>
+  <select id="studentSelect">
+    <option value="">-- Chọn học sinh --</option>
+  </select>
+
+  <button onclick="markAttendance()">✅ Xác nhận điểm danh</button>
+
+  <div class="actions">
+    <button onclick="clearAttendance()">🗑 Xóa danh sách điểm danh</button>
+    <button onclick="exportToCSV()">📤 Xuất danh sách CSV</button>
+  </div>
+
+  <h3>Danh sách đã điểm danh:</h3>
+  <table id="attendanceTable">
+    <thead>
+      <tr><th>Lớp</th><th>Họ tên</th><th>Thời gian</th></tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    const studentsData = {
+      "12A1": ["NGUYỄN TRƯỜNG AN", "HỒ THANH TÀI ANH", "TRỊNH PHẠM GIA BẢO", "NGUYỄN LÊ CÔNG", "NGUYỄN THỊ THÙY DUNG", "NGUYỄN VĂN DŨNG", "PHẠM HÙNG DŨNG", "LẠI TUẤN HẢI", "NGUYỄN TRUNG HIẾU", "NGÔ VĂN CHÂU HƯỚNG", "LƯƠNG HOÀNG ĐĂNG KHÔI", "CÀ TRÍ KIÊN", "NGUYỄN TRUNG KIÊN", "NGUYỄN TRƯƠNG NHI LINH", "TRẦN MAI LINH", "ĐỖ NGỌC MỸ", "NGUYỄN THỊ KIM NGÂN", "NGUYỄN THỊ THÚY NGÂN", "LÊ MINH CHÍ NGUYÊN", "QUANG TÔ NHẬT NGUYÊN", "TRẦN MINH PHI", "NGÔ CHÍ PHONG", "LÊ ANH PHƯỚC", "NGUYỄN ĐĂNG QUANG", "ĐẶNG NHƯ QUỲNH", "NGUYỄN CẢNH SÁNG", "H' SINH - HĐƠK", "NGUYỄN HOÀNG SƠN", "TRẦN VĂN TIẾN", "VÕ NGỌC TIẾN", "NGUYỄN ĐỖ BẢO TRÂM", "PHAN THANH BẢO TRUNG", "DƯƠNG QUỐC VIỆT", "NGUYỄN ANH VŨ", "PHAN THANH THẢO VY", "HOÀNG THỊ VÂN ANH", "NGUYỄN ĐÀO HỒNG HẠNH", "Đặng Tô Khoa"],
+      "12A2": ["DƯƠNG QUỲNH ANH", "LÊ QUỐC CƯỜNG", "LÊ ANH DUY", "NGUYỄN TIẾN DƯƠNG", "NGUYỄN BÁ ĐẠI", "NGUYỄN TẤN ĐẠT", "NGUYỄN-SƠN-HÂN", "TRẦN VĂN HIẾU", "PHAN ĐỨC HOÀNG", "NGUYỄN THỊ KIM HUỆ", "LƯU QUANG HUY", "HUỲNH TRẦN ĐĂNG KHOA", "LƯU TUẤN KIỆT", "NGUYỄN TẤN LÂM", "CHÂU THỊ THÙY LINH", "LÊ THỊ NA", "NGUYỄN ĐẮC NAM", "NGUYỄN HOÀNG NAM", "NGUYỄN THỊ KIM NGÂN", "ĐINH MINH NHƯ NGỌC", "LƯU BÙI QUANG NGUYÊN", "NGUYỄN THỊ TRƯỜNG NGUYÊN", "NGUYỄN THỊ MỸ NHƯ", "LÊ TẤN PHÁT", "NGUYỄN MINH QUÂN", "LÊ TẤN SANG", "ĐOÀN THỊ PHƯƠNG THANH", "LÊ NGỌC KHÁNH THẢO", "NGUYỄN VĂN THẢO", "TÔN NỮ THU THẢO", "HOÀNG NGUYỄN ANH THƯ", "NGUYỄN ANH THƯ", "TRỊNH NGỌC DIỆU THƯƠNG", "TRẦN THỊ UYÊN TRANG", "TRẦN THỊ THANH TRÂM", "LÒ TRÂN TRÂN", "LÊ THỊ TÚ TRINH", "NGUYỄN THỊ KIỀU TRINH", "BÙI MINH TUẤN", "HOÀNG THANH TÚ", "TRẦN QUỐC VIỆT", "NGUYỄN THANH XUÂN", "NGUYỄN VÕ CẦN"],
+      "12A3": ["NGUYỄN NGUYỄN THÁI BẢO", "LÊ THỊ DIỄM CHINH", "CHU NGUYỄN HOÀNG HẢI", "LÊ MINH HẢI", "NGUYỄN TRẦN NGỌC HÂN", "H' LÊ NA BYĂ", "NGUYỄN THỊ PHƯƠNG LINH", "NGUYỄN KHÁNH LY", "NGUYỄN QUỲNH MAI", "NGUYỄN HUỲNH HOÀI NAM", "NGUYỄN THỊ THÚY NGA", "NGUYỄN THỊ THIÊN NGÂN", "TRẦN NGUYỄN THẢO NGUYÊN", "ĐOÀN THỊ YẾN NHI", "NGUYỄN THỊ QUỲNH NHƯ", "PHAN THỊ TÚ NI", "H NIVIA BYĂ", "NGUYỄN BẢO QUỐC", "NGUYỄN VĂN QUÝ", "PHẠM VIẾT THANH SƠN", "Y THA NI - BYĂ", "NGUYỄN THỊ THANH THỦY", "VŨ THỊ ANH THƯ", "H' TRA-MI KBUÔR", "VŨ THỊ BẢO TRÂM", "TRẦN VĂN TÙNG", "NGUYỄN LÂM BẢO YẾN", "NGUYỄN NGỌC BÍCH", "TRỊNH KHÁNH HUYỀN", "LÊ THỊ TUYẾT NHUNG", "LÊ NGUYỄN BÍCH PHƯỢNG"],
+	  "12A4": ["HỒ HÀ QUỲNH ANH", "NGUYỄN CHIẾN CÔNG", "TRẦN DUY CÔNG", "NGUYỄN THỊ HỒNG CÚC", "HOÀNG MINH DƯƠNG", "TỪ THỊ ANH ĐÀO", "VÕ VĂN ĐẠT", "PHAN THỊ DIỆU HẰNG", "LÊ VIẾT HIẾU", "NGUYỄN ĐỖ HOÀNG HUY", "NGUYỄN NGỌC HUY", "NGUYỄN THỊ THU HUYỀN", "NÔNG MẠNH HÙNG", "HÀ THỊ MỸ LAN", "TRẦN THỊ MỸ LINH", "NGUYỄN THỊ THẢO MAI", "NGUYỄN NGỌC LY NA", "NA GIN NIÊ", "PHẠM XUÂN NGUYÊN", "HOÀNG THỊ TÚ OANH", "PHAN THỊ OANH", "VŨ THỊ THU PHƯỢNG", "ĐOÀN HOÀNG QUYÊN", "VŨ NHƯ QUỲNH", "H SI NA - BYĂ", "NGUYỄN ĐƯỜNG ĐAN THANH", "NINH THỊ THU THẢO", "NGUYỄN THỊ PHƯƠNG THI", "TRẦN NGUYỄN ANH THÙY", "NGUYỄN ANH THƯ", "NGUYỄN NGỌC ANH THƯ", "HOÀNG MINH TIẾN", "NGUYỄN THỊ PHƯƠNG TRINH", "TRỊNH ĐỨC TRƯỜNG", "LÊ QUỐC TUẤN", "NGÔ THANH VÂN", "H' VEL BYĂ", "HỨA HÀ VI", "LÒ HUY VŨ", "PHẠM KHÁNH LINH"],// Rút gọn danh sách mẫu để demo
+	  "12A5": ["PHAN NGUYỄN HÀ AN", "NGUYỄN TRUNG HOÀNG ANH", "LƯU GIA BẢO", "H-DIỆU BKRÔNG", "NGUYỄN DANH ĐẠT", "NGUYỄN LAM ĐIỀN", "PHẠM VĂN ĐỒNG", "NGUYỄN NGỌC HÀ", "NGUYỄN VIỆT HÀ", "PHẠM MỸ HẠNH", "HẰNG H' WING", "ĐẶNG THỊ THANH HẰNG", "NGUYỄN THỊ HỒNG HIỂN", "PHẠM THỊ NGỌC HOA", "LÊ ĐÌNH HOÀNG", "ĐẬU QUỐC MẠNH", "NGUYỄN HÀ MY", "BÙI THỊ YẾN NGỌC", "NGUYỄN THỊ YẾN NGỌC", "NGUYỄN-VĂN-NHẬT", "TẠ BẢO NHI", "PHẠM VĂN NINH", "HUỲNH HỒ GIA PHÁT", "TẠ LÊ THỤC QUYÊN", "H RIAN BYĂ", "H RINA HĐƠK", "NGUYỄN TRƯỜNG SINH", "CHÂU NGỌC SƠN", "HỒ HÀ SỸ SƠN", "TRẦN THỊ MỸ TÂM", "H' TÊN BYĂ", "TRẦN THỊ HƯƠNG THẢO", "THIỆU KIỀU THI", "NGUYỄN MAI TRANG", "HOÀNG LÊ MỸ TRINH", "NGUYỄN TRUNG TUẤN", "NGUYỄN VĂN TÙNG", "NGUYỄN HOÀNG VŨ", "BÙI THỊ CẨM VY"],
+	  "12A6": ["NGUYỄN NHƯ QUỲNH ANH", "PHAN NGUYỄN NHƯ ANH", "NGUYỄN THỊ ÁNH", "MAI THANH DIỄM", "HỒ HÀ HOÀNG DUYÊN", "HUỲNH ĐỨC", "LÊ THANH GIAO", "NGUYỄN MAI HUỆ", "NGUYỄN HOÀNG HƯNG", "TRẦN VĂN KỲ", "MAI NGỌC THANH LAN", "HUỲNH THỊ PHƯỚC LÀNH", "H LĨ BUÔN YĂ", "MAI QUANG LONG", "LƯƠNG QUANG LƯU", "TRỊNH CẨM LY", "NGUYỄN TRƯƠNG TIỂU MI", "H' NGUÔL NIÊ", "TRẦN MINH NGUYÊN", "HOÀNG THỊ THANH NHÀN", "NGUYỄN THỊ NHUNG", "H' NIA ÊBAN", "THIỆU VĂN PHONG", "ĐẶNG NHƯ CÔNG PHÚC", "ĐỖ DƯƠNG NHƯ QUỲNH", "ĐÀO THỊ DIỄM QUỲNH", "ĐẶNG XUÂN QUÝ", "NGUYỄN PHAN HỒNG TÂM", "LÊ VĂN THẮNG", "MAI THỊ THU THÚY", "HOÀNG MINH TRIẾT", "ĐỖ THỊ TUYẾT TRINH", "HỒ HOÀNG TUẤN", "BÙI THỊ THANH TUYỀN", "LƯƠNG TUYẾT NHI", "PHẠM THỊ ÁNH THÙY", "NGUYỄN HOÀNG THẢO UYÊN", "TRẦN THỊ THẢO UYÊN"],
+	  "12A7": ["HOÀNG THỊ TÚ ANH", "NGUYỄN NGỌC NHƯ ANH", "NGUYỄN TUẤN ANH", "TRẦN TUẤN ANH", "NGUYỄN GIA BẢO", "NGUYỄN GIA BẮC", "NGUYỄN HÙNG GIA", "HUỲNH NGỌC GIA HÂN", "H LIZA BYĂ", "HỒ THỊ KIỀU LOAN", "LÝ THỊ THÙY MAI", "H MIÊN BYĂ", "TRẦN THỊ QUỲNH NHƯ", "H NIÊM H ĐƠK", "LÊ VĂN PHONG", "LÊ VĂN PHÚC", "TRỊNH HÀO QUANG", "ĐÀO XUÂN SANG", "PHAN VĂN SỸ", "ĐÀO XUÂN TÀI", "TÔ NGỌC THANH", "CAO BÍCH PHƯƠNG THẢO", "PHẠM THỊ NGỌC THÚY", "HỒ SỸ TÍNH", "NGUYỄN THỊ THU TRANG", "HOÀNG ANH TUẤN", "VƯƠNG QUỐC TUẤN", "PHAN NGỌC TÚ", "NGUYỄN THỊ THẢO UYÊN", "NGUYỄN ĐĂNG HỒNG VŨ"],
+	  "12A8": ["HÀ TRÂM ANH", "LÊ THỊ HƯƠNG GIANG", "NGUYỄN THỊ TRÚC GIANG", "Y - GUÔP NIÊ", "TRẦN MINH HẠNH", "NGUYỄN THỊ GIA HÂN", "NGUYỄN QUANG GIA HUY", "VŨ MINH HUY", "NGUYỄN VŨ BẢO KHANG", "BÙI TRUNG KIÊN", "NGUYỄN LƯƠNG BẢO LÂM", "Y - LOA NIÊ", "NGUYỄN THỊ ÁNH LY", "NGUYỄN THỊ KHÁNH LY", "TRẦN THỊ TRÀ MY", "TRẦN THỊ THÙY NA", "NGUYỄN THỊ MỸ NGÂN", "PHẠM TRẦN BẢO NGÂN", "NGÔ ĐOÀN HOÀNG NHI", "NGUYỄN THỊ ÁNH NHƯ", "CAO THANH PHÁT", "NGUYỄN HỮU PHÁT", "PHẠM HOÀNG PHỐ", "DƯƠNG HÀ NHẬT THANH", "H' THẢO KTUL", "NGUYỄN THỊ THANH THẢO", "NGUYỄN THỊ THẢO", "NGUYỄN THỊ ANH THƠ", "NGUYỄN THỊ HUYỀN TRÂM", "Đỗ Thị Khánh Ly"],
+	  "12A9": ["ĐỖ THỊ PHƯƠNG ANH", "NGUYỄN THÁI PHƯƠNG ANH", "NGUYỄN HIẾU ÂN", "NGUYỄN CÔNG DIỆU", "HÀ NGUYỄN DUY", "TRẦN ĐÌNH DƯƠNG", "THẠCH THỊ MỸ ĐÌNH", "DƯƠNG ĐẠI ĐỨC", "LÊ THỊ THU HIỀN", "NGUYỄN BÁ ĐẶNG HOÀNG", "NGUYỄN LÂM HÙNG", "Y LA VI - NIÊ KDĂM", "Y LUP BYĂ", "PHẠM THỊ MAI", "DƯƠNG NGỌC TRÀ MY", "LÊ PHƯƠNG NGUYÊN", "NGUYỄN THỊ QUỲNH NHƯ", "MAI VĂN PHI", "ĐINH HẢI PHONG", "VŨ DUY NHẬT QUÂN", "LƯU DIỄM QUỲNH", "H' SIAN ÊBAN", "TRẦN BÌNH NGUYÊN SƠN", "NGUYỄN PHẠM ANH TÀI", "NGUYỄN THỊ NGỌC TÂM", "TRẦN TÂM", "VÕ HOÀI BẢO THI", "NGÔ HOÀNG THIÊN", "TRẦN THỊ THANH THUẬN", "MAI THỊ THU THUỶ", "PHẠM THIÊN THƯ", "ĐỖ THỊ HUYỀN TRANG", "THÙNG NGỌC ANH TUẤN", "NGUYỄN ĐÌNH TÙNG", "H ƯI ÊYA", "Y Rani Niê Ktul"],
+	};
+
+    const classSelect = document.getElementById("classSelect");
+    const studentSelect = document.getElementById("studentSelect");
+    const attendanceTable = document.getElementById("attendanceTable").querySelector("tbody");
+
+    Object.keys(studentsData).forEach(cls => {
+      const option = document.createElement("option");
+      option.value = cls;
+      option.textContent = cls;
+      classSelect.appendChild(option);
+    });
+
+    classSelect.addEventListener("change", () => {
+      const selectedClass = classSelect.value;
+      studentSelect.innerHTML = '<option value="">-- Chọn học sinh --</option>';
+      if (studentsData[selectedClass]) {
+        studentsData[selectedClass].forEach(name => {
+          const option = document.createElement("option");
+          option.value = name;
+          option.textContent = name;
+          studentSelect.appendChild(option);
+        });
+      }
+    });
+
+    function markAttendance() {
+      const cls = classSelect.value;
+      const name = studentSelect.value;
+      if (cls && name) {
+        const existingRows = Array.from(attendanceTable.querySelectorAll("tr"));
+        const alreadyMarked = existingRows.some(row =>
+          row.cells[0].textContent === cls && row.cells[1].textContent === name
+        );
+        if (alreadyMarked) {
+          alert("Học sinh này đã được điểm danh.");
+          return;
+        }
+
+        const now = new Date().toLocaleString("vi-VN");
+        const row = `<tr><td>${cls}</td><td>${name}</td><td>${now}</td></tr>`;
+        attendanceTable.innerHTML += row;
+        saveToLocalStorage();
+      } else {
+        alert("Vui lòng chọn lớp và học sinh.");
+      }
+    }
+
+    function saveToLocalStorage() {
+      localStorage.setItem("attendanceList", attendanceTable.innerHTML);
+    }
+
+    function loadFromLocalStorage() {
+      const saved = localStorage.getItem("attendanceList");
+      if (saved) attendanceTable.innerHTML = saved;
+    }
+
+    function clearAttendance() {
+      if (confirm("Bạn có chắc chắn muốn xóa toàn bộ danh sách điểm danh?")) {
+        attendanceTable.innerHTML = "";
+        localStorage.removeItem("attendanceList");
+      }
+    }
+
+    function exportToCSV() {
+      let csvContent = "data:text/csv;charset=utf-8,Lớp,Họ tên,Thời gian\n";
+      const rows = attendanceTable.querySelectorAll("tr");
+      rows.forEach(row => {
+        const cells = row.querySelectorAll("td");
+        if (cells.length) {
+          const rowData = Array.from(cells).map(cell => `"${cell.textContent}"`).join(",");
+          csvContent += rowData + "\n";
+        }
+      });
+
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", "diem_danh.csv");
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    window.onload = loadFromLocalStorage;
+  </script>
+
+</body>
+</html>
