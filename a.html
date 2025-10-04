@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài Trắc Nghiệm Sinh Học Tương Tác</title>
+    <style>
+        body {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #e8f5e8 0%, #b8e6b8 50%, #87ceeb 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .floating-cells {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .cell {
+            position: absolute;
+            font-size: 20px;
+            animation: float 8s infinite linear;
+            opacity: 0.3;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+            }
+            100% {
+                transform: translateY(-100px) rotate(360deg);
+            }
+        }
+
+        .container {
+            position: relative;
+            z-index: 2;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .title {
+            font-size: 2.5em;
+            color: #2d5016;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .subtitle {
+            font-size: 1.2em;
+            color: #4a7c59;
+            margin-bottom: 20px;
+        }
+
+        .progress-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .tree-progress {
+            font-size: 4em;
+            transition: all 0.5s ease;
+            filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.2));
+        }
+
+        .score-display {
+            background: linear-gradient(45deg, #4CAF50, #81C784);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 25px;
+            font-weight: bold;
+            font-size: 1.1em;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+        }
+
+        .quiz-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(76, 175, 80, 0.2);
+        }
+
+        .level-indicator {
+            display: inline-block;
+            background: linear-gradient(45deg, #FF9800, #FFC107);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            font-size: 0.9em;
+        }
+
+        .question {
+            font-size: 1.3em;
+            color: #2d5016;
+            margin-bottom: 20px;
+            line-height: 1.4;
+        }
+
+        .options {
+            display: grid;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .option {
+            background: linear-gradient(45deg, #f8f9fa, #e9ecef);
+            border: 2px solid #81C784;
+            border-radius: 15px;
+            padding: 15px 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1.1em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .option:hover {
+            background: linear-gradient(45deg, #e8f5e8, #c8e6c9);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(76, 175, 80, 0.2);
+        }
+
+        .option.selected {
+            background: linear-gradient(45deg, #4CAF50, #66BB6A);
+            color: white;
+            border-color: #2E7D32;
+        }
+
+        .option.correct {
+            background: linear-gradient(45deg, #4CAF50, #66BB6A);
+            color: white;
+            border-color: #2E7D32;
+            animation: correctPulse 0.6s ease;
+        }
+
+        .option.incorrect {
+            background: linear-gradient(45deg, #f44336, #ef5350);
+            color: white;
+            border-color: #c62828;
+            animation: incorrectShake 0.6s ease;
+        }
+
+        @keyframes correctPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        @keyframes incorrectShake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .submit-btn {
+            background: linear-gradient(45deg, #4CAF50, #66BB6A);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+        }
+
+        .submit-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .next-btn {
+            background: linear-gradient(45deg, #2196F3, #42A5F5);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(33, 150, 243, 0.3);
+            margin-left: 10px;
+        }
+
+        .next-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(33, 150, 243, 0.4);
+        }
+
+        .feedback {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .feedback.correct {
+            background: linear-gradient(45deg, #c8e6c9, #a5d6a7);
+            color: #2e7d32;
+            border: 2px solid #4caf50;
+        }
+
+        .feedback.incorrect {
+            background: linear-gradient(45deg, #ffcdd2, #ef9a9a);
+            color: #c62828;
+            border: 2px solid #f44336;
+        }
+
+        .completion-screen {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .badge {
+            font-size: 6em;
+            margin: 20px 0;
+            animation: badgePulse 2s infinite;
+        }
+
+        @keyframes badgePulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .floating-leaves {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 3;
+        }
+
+        .leaf {
+            position: absolute;
+            font-size: 30px;
+            animation: leafFall 4s infinite linear;
+        }
+
+        @keyframes leafFall {
+            0% {
+                transform: translateY(-100px) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        .restart-btn {
+            background: linear-gradient(45deg, #FF9800, #FFB74D);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 152, 0, 0.3);
+            margin-top: 20px;
+        }
+
+        .restart-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 152, 0, 0.4);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .title {
+                font-size: 2em;
+            }
+            
+            .tree-progress {
+                font-size: 3em;
+            }
+            
+            .quiz-card {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="floating-cells" id="floatingCells"></div>
+    <div class="floating-leaves hidden" id="floatingLeaves"></div>
+
+    <div class="container">
+        <div class="header">
+            <h1 class="title">🧬 Bài Trắc Nghiệm Sinh Học 🌱</h1>
+            <p class="subtitle">Khám phá thế giới tuyệt vời của sinh học cùng chúng tôi!</p>
+            
+            <div class="progress-container">
+                <div class="tree-progress" id="treeProgress">🌱</div>
+                <div class="score-display">
+                    <span id="scoreText">Điểm: 0/9</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="quizContainer">
+            <!-- Câu hỏi sẽ được tạo động bằng JavaScript -->
+        </div>
+
+        <div id="completionScreen" class="completion-screen hidden">
+            <h2>🎉 Chúc mừng! 🎉</h2>
+            <div class="badge">🏆</div>
+            <h3>🔬🧪🧬 Nhà Sinh Học Nhí 🧬🧪🔬</h3>
+            <p id="finalScore"></p>
+            <p>Bạn đã hoàn thành xuất sắc bài trắc nghiệm sinh học!</p>
+            <button class="restart-btn" onclick="restartQuiz()">🔄 Làm lại bài trắc nghiệm</button>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            // Cấp độ 1 - Dễ
+            {
+                level: 1,
+                question: "🦠 Tế bào là gì?",
+                options: [
+                    "🏠 Đơn vị cơ bản cấu tạo nên cơ thể sống",
+                    "🪨 Một loại đá nhỏ",
+                    "💧 Một giọt nước",
+                    "🌟 Một ngôi sao nhỏ"
+                ],
+                correct: 0,
+                explanation: "Tuyệt vời! 🦠 Tế bào chính là đơn vị cơ bản cấu tạo nên mọi sinh vật!"
+            },
+            {
+                level: 1,
+                question: "🌱 Quang hợp là quá trình gì?",
+                options: [
+                    "🌙 Thực vật ngủ vào ban đêm",
+                    "☀️ Thực vật tạo ra thức ăn từ ánh sáng mặt trời",
+                    "🌧️ Thực vật uống nước",
+                    "🍂 Thực vật rụng lá"
+                ],
+                correct: 1,
+                explanation: "Chính xác! 🌱 Quang hợp giúp thực vật tạo ra thức ăn từ ánh sáng mặt trời!"
+            },
+            {
+                level: 1,
+                question: "🐕 Chó thuộc nhóm động vật nào?",
+                options: [
+                    "🐠 Động vật có vây",
+                    "🦅 Động vật có cánh",
+                    "🦴 Động vật có xương sống",
+                    "🐛 Động vật không xương sống"
+                ],
+                correct: 2,
+                explanation: "Đúng rồi! 🐕 Chó là động vật có xương sống (động vật có xương)!"
+            },
+            // Cấp độ 2 - Trung bình
+            {
+                level: 2,
+                question: "🧫 Bộ phận nào của tế bào thực vật chứa chất diệp lục?",
+                options: [
+                    "🔵 Nhân tế bào",
+                    "🟢 Lục lạp",
+                    "🟤 Thành tế bào",
+                    "⚪ Không bào"
+                ],
+                correct: 1,
+                explanation: "Tuyệt vời! 🟢 Lục lạp chứa chất diệp lục giúp thực vật thực hiện quang hợp!"
+            },
+            {
+                level: 2,
+                question: "🌿 Trong quang hợp, thực vật cần những gì?",
+                options: [
+                    "☀️ Chỉ cần ánh sáng",
+                    "💧 Chỉ cần nước",
+                    "☀️💧🌬️ Ánh sáng, nước và khí CO2",
+                    "🌙 Chỉ cần ánh trăng"
+                ],
+                correct: 2,
+                explanation: "Chính xác! 🌿 Quang hợp cần ánh sáng, nước và khí CO2!"
+            },
+            {
+                level: 2,
+                question: "🦋 Động vật nào sau đây là động vật không xương sống?",
+                options: [
+                    "🐸 Ếch",
+                    "🐍 Rắn",
+                    "🦋 Bướm",
+                    "🐦 Chim"
+                ],
+                correct: 2,
+                explanation: "Đúng! 🦋 Bướm là động vật không xương sống (côn trùng)!"
+            },
+            // Cấp độ 3 - Khó
+            {
+                level: 3,
+                question: "🧬 DNA có vai trò gì trong tế bào?",
+                options: [
+                    "🍎 Tạo ra thức ăn",
+                    "📚 Lưu trữ thông tin di truyền",
+                    "💨 Tạo ra khí oxygen",
+                    "🔋 Cung cấp năng lượng"
+                ],
+                correct: 1,
+                explanation: "Xuất sắc! 🧬 DNA lưu trữ toàn bộ thông tin di truyền của sinh vật!"
+            },
+            {
+                level: 3,
+                question: "🔬 Quá trình nào xảy ra trong ti thể?",
+                options: [
+                    "🌱 Quang hợp",
+                    "⚡ Hô hấp tế bào",
+                    "🧬 Tổng hợp protein",
+                    "💧 Lọc nước"
+                ],
+                correct: 1,
+                explanation: "Tuyệt vời! ⚡ Ti thể là nơi diễn ra hô hấp tế bào để tạo năng lượng!"
+            },
+            {
+                level: 3,
+                question: "🦠 Đặc điểm nào phân biệt tế bào thực vật và tế bào động vật?",
+                options: [
+                    "🔵 Có nhân tế bào",
+                    "🟢 Có thành tế bào và lục lạp",
+                    "⚪ Có chất tế bào",
+                    "🧬 Có DNA"
+                ],
+                correct: 1,
+                explanation: "Chính xác! 🟢 Tế bào thực vật có thành tế bào và lục lạp mà tế bào động vật không có!"
+            }
+        ];
+
+        let currentQuestion = 0;
+        let score = 0;
+        let selectedAnswer = null;
+        let answered = false;
+
+        function createFloatingCells() {
+            const container = document.getElementById('floatingCells');
+            const cells = ['🔬🦠', '🧫🦠', '🔬🧬', '🧫🧬'];
+            
+            setInterval(() => {
+                const cell = document.createElement('div');
+                cell.className = 'cell';
+                cell.textContent = cells[Math.floor(Math.random() * cells.length)];
+                cell.style.left = Math.random() * 100 + '%';
+                cell.style.animationDuration = (Math.random() * 3 + 5) + 's';
+                container.appendChild(cell);
+                
+                setTimeout(() => {
+                    if (cell.parentNode) {
+                        cell.parentNode.removeChild(cell);
+                    }
+                }, 8000);
+            }, 1000);
+        }
+
+        function updateTreeProgress() {
+            const treeProgress = document.getElementById('treeProgress');
+            const progress = score / questions.length;
+            
+            if (progress < 0.33) {
+                treeProgress.textContent = '🌱';
+            } else if (progress < 0.66) {
+                treeProgress.textContent = '🌿';
+            } else {
+                treeProgress.textContent = '🌳';
+            }
+        }
+
+        function updateScore() {
+            document.getElementById('scoreText').textContent = `Điểm: ${score}/${questions.length}`;
+            updateTreeProgress();
+        }
+
+        function displayQuestion() {
+            const container = document.getElementById('quizContainer');
+            const question = questions[currentQuestion];
+            
+            const levelColors = {
+                1: 'linear-gradient(45deg, #4CAF50, #66BB6A)',
+                2: 'linear-gradient(45deg, #FF9800, #FFB74D)',
+                3: 'linear-gradient(45deg, #f44336, #ef5350)'
+            };
+            
+            const levelNames = {
+                1: '🌱 Cấp độ Dễ',
+                2: '🌿 Cấp độ Trung bình',
+                3: '🌳 Cấp độ Khó'
+            };
+
+            container.innerHTML = `
+                <div class="quiz-card">
+                    <div class="level-indicator" style="background: ${levelColors[question.level]}">
+                        ${levelNames[question.level]}
+                    </div>
+                    <div class="question">${question.question}</div>
+                    <div class="options">
+                        ${question.options.map((option, index) => `
+                            <div class="option" onclick="selectAnswer(${index})" data-index="${index}">
+                                ${option}
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div style="text-align: center;">
+                        <button class="submit-btn" id="submitBtn" onclick="submitAnswer()" disabled>
+                            Trả lời
+                        </button>
+                        <button class="next-btn hidden" id="nextBtn" onclick="nextQuestion()">
+                            ${currentQuestion === questions.length - 1 ? 'Hoàn thành' : 'Câu tiếp theo'} →
+                        </button>
+                    </div>
+                    <div id="feedback"></div>
+                </div>
+            `;
+            
+            selectedAnswer = null;
+            answered = false;
+        }
+
+        function selectAnswer(index) {
+            if (answered) return;
+            
+            const options = document.querySelectorAll('.option');
+            options.forEach(option => option.classList.remove('selected'));
+            
+            options[index].classList.add('selected');
+            selectedAnswer = index;
+            
+            document.getElementById('submitBtn').disabled = false;
+        }
+
+        function submitAnswer() {
+            if (selectedAnswer === null || answered) return;
+            
+            answered = true;
+            const question = questions[currentQuestion];
+            const options = document.querySelectorAll('.option');
+            const feedback = document.getElementById('feedback');
+            
+            options[question.correct].classList.add('correct');
+            
+            if (selectedAnswer === question.correct) {
+                score++;
+                feedback.innerHTML = `<div class="feedback correct">✅ ${question.explanation}</div>`;
+            } else {
+                options[selectedAnswer].classList.add('incorrect');
+                feedback.innerHTML = `<div class="feedback incorrect">❌ Sai rồi! Đáp án đúng là: ${question.options[question.correct]}</div>`;
+            }
+            
+            updateScore();
+            document.getElementById('submitBtn').classList.add('hidden');
+            document.getElementById('nextBtn').classList.remove('hidden');
+        }
+
+        function nextQuestion() {
+            currentQuestion++;
+            
+            if (currentQuestion >= questions.length) {
+                showCompletionScreen();
+            } else {
+                displayQuestion();
+            }
+        }
+
+        function showCompletionScreen() {
+            document.getElementById('quizContainer').classList.add('hidden');
+            document.getElementById('completionScreen').classList.remove('hidden');
+            
+            const percentage = Math.round((score / questions.length) * 100);
+            document.getElementById('finalScore').textContent = 
+                `Bạn đã trả lời đúng ${score}/${questions.length} câu (${percentage}%)`;
+            
+            createFloatingLeaves();
+        }
+
+        function createFloatingLeaves() {
+            const container = document.getElementById('floatingLeaves');
+            container.classList.remove('hidden');
+            
+            const leaves = ['🍃', '🌿', '🍀'];
+            
+            const interval = setInterval(() => {
+                const leaf = document.createElement('div');
+                leaf.className = 'leaf';
+                leaf.textContent = leaves[Math.floor(Math.random() * leaves.length)];
+                leaf.style.left = Math.random() * 100 + '%';
+                leaf.style.animationDuration = (Math.random() * 2 + 3) + 's';
+                container.appendChild(leaf);
+                
+                setTimeout(() => {
+                    if (leaf.parentNode) {
+                        leaf.parentNode.removeChild(leaf);
+                    }
+                }, 4000);
+            }, 300);
+            
+            setTimeout(() => {
+                clearInterval(interval);
+                container.classList.add('hidden');
+            }, 10000);
+        }
+
+        function restartQuiz() {
+            currentQuestion = 0;
+            score = 0;
+            selectedAnswer = null;
+            answered = false;
+            
+            document.getElementById('completionScreen').classList.add('hidden');
+            document.getElementById('quizContainer').classList.remove('hidden');
+            document.getElementById('floatingLeaves').classList.add('hidden');
+            
+            updateScore();
+            displayQuestion();
+        }
+
+        // Khởi tạo
+        createFloatingCells();
+        updateScore();
+        displayQuestion();
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98914e28f500509a',t:'MTc1OTU0NTUzMC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
